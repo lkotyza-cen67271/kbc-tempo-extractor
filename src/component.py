@@ -1,15 +1,24 @@
-"""
-Template Component main class.
-
-"""
 import csv
-from datetime import datetime
 import logging
+import worklog_author
 
+from jirac import jc
+import tempo
+from datetime import datetime
 from keboola.component.base import ComponentBase
 from keboola.component.exceptions import UserException
 
 from configuration import Configuration
+
+
+config = {
+    'jql_select': "key = FVM-4629",
+    'org_name': "csas-test",
+    'tempo_token': "",
+    'user_email': "jiracloud@csas.cz",
+    'jira_token': "",
+    'since': "2024-08-01"
+}
 
 
 class Component(ComponentBase):
@@ -30,7 +39,27 @@ class Component(ComponentBase):
         """
         Main execution code
         """
+        # check for missing configuration parameters
+        params = Configuration(**self.configuration.parameters)
 
+        # initialize modules
+        auth_tpl = (params.user_email, params.jira_token)
+        jc.init(params.org_name, auth_tpl)
+        tempo.init(params.tempo_token)
+
+        data = worklog_author.run()
+        if data is not None and len(data) > 0:
+            headers = data[0].keys()
+            self.create_out_table_definition(worklog_author.FILENAME,
+                                             incremental=params.incremental,
+                                             primary_key=headers
+                                             # TODO how to define column types?
+                                             # better practice to add headers
+                                             # in definition or in write method
+                                             )
+            pass
+
+        """
         # ####### EXAMPLE TO REMOVE
         # check for missing configuration parameters
         params = Configuration(**self.configuration.parameters)
@@ -41,6 +70,8 @@ class Component(ComponentBase):
 
         # get input table definitions
         input_tables = self.get_input_tables_definitions()
+        if len(input_tables) > 0:
+            logging.info(input_tables[0])
         for table in input_tables:
             logging.info(f'Received input table: {table.name} with path: {table.full_path}')
 
@@ -82,6 +113,7 @@ class Component(ComponentBase):
         self.write_state_file({"some_state_parameter": "value"})
 
         # ####### EXAMPLE TO REMOVE END
+        """
 
 
 """

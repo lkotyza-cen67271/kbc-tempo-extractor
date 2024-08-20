@@ -1,12 +1,15 @@
-import logging
-from pydantic import BaseModel, Field, ValidationError, field_validator
+from pydantic import BaseModel, ValidationError  # , Field, field_validator
 from keboola.component.exceptions import UserException
 
 
 class Configuration(BaseModel):
-    print_hello: bool
-    api_token: str = Field(alias="#api_token")
     debug: bool = False
+    incremental: bool = True
+    org_name: str = ""
+    tempo_token: str = ""
+    user_email: str = ""
+    jira_token: str = ""
+    since: str = ""
 
     def __init__(self, **data):
         try:
@@ -14,12 +17,3 @@ class Configuration(BaseModel):
         except ValidationError as e:
             error_messages = [f"{err['loc'][0]}: {err['msg']}" for err in e.errors()]
             raise UserException(f"Validation Error: {', '.join(error_messages)}")
-
-        if self.debug:
-            logging.debug("Component will run in Debug mode")
-
-    @field_validator('api_token')
-    def token_must_be_uppercase(cls, v):
-        if not v.isupper():
-            raise UserException('API token must be uppercase')
-        return v

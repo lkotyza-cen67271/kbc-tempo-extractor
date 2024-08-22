@@ -26,14 +26,16 @@
 		"title": "User email:",
 		"propertyOrder": 2
 	},
-	"jira_token": {
+	"#jira_token": {
 		"type": "string",
 		"title": "Jira token:",
+		"format": "password",
 		"propertyOrder": 3
 	},
-	"tempo_token": {
+	"#tempo_token": {
 		"type": "string",
 		"title": "Temp token:",
+		"format": "password",
 		"propertyOrder": 4
 	},
 	"since": {

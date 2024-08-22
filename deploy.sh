@@ -63,3 +63,4 @@ then
 else
     echo "Skipping deployment to KBC, tag ${TAG} is not allowed."
 fi
+

@@ -1,5 +1,7 @@
 from typing import Optional
-import datetime as dt
+from datetime import datetime as dt
+
+from keboola.component.dao import BaseType, ColumnDefinition, SupportedDataTypes
 import jirac as jc
 import tempo
 import logging
@@ -7,10 +9,31 @@ import logging
 
 FILENAME = "worklog_authors.csv"
 
+COL_JIRA_WORKLOG_ID: str = "jira_worklog_id"
+COL_AUTHOR_ID: str = "account_id"
+
+
+def column_definitions() -> dict[str, ColumnDefinition]:
+    return {
+        COL_JIRA_WORKLOG_ID: ColumnDefinition(
+            data_types=BaseType(dtype=SupportedDataTypes.INTEGER, length="20"),
+            nullable=False,
+            primary_key=True,
+            description="Jira worklog id"
+        ),
+        COL_AUTHOR_ID: ColumnDefinition(
+            data_types=BaseType(dtype=SupportedDataTypes.STRING, length="200"),
+            nullable=False,
+            primary_key=False,
+            description="Jira user id"
+        )
+    }
+
 
 def run(since: str) -> Optional[list[dict[str, str | int]]]:
     """
-    maps jira worklog id to tempo worklog id and finds author info from tempo
+    loads jira worklog ids from 'since' and
+    maps them to tempo worklog id and than finds author info from tempo
 
     since: isoformat date '2020-01-30'
 
@@ -20,7 +43,8 @@ def run(since: str) -> Optional[list[dict[str, str | int]]]:
         ...
     ]
     """
-    date_from = dt.datetime.fromisoformat(since)
+    logging.info("started worklog_authors")
+    date_from = dt.fromisoformat(since)
     since_mls = int(date_from.timestamp()) * 1_000
     # load jira worklog ids
     worklog_ids = jc.worklog_ids(since_mls)
@@ -31,7 +55,7 @@ def run(since: str) -> Optional[list[dict[str, str | int]]]:
     # get mapping between jira id and tempo id
     mapped = tempo.jira_to_tempo_worklog_ids(worklog_ids)
     if mapped is None:
-        logging.error("main", "Failed to get mapping")
+        logging.error("Failed to get mapping")
         return
     logging.debug("[worklog_authors] finished mapping jira to tempo")
     # get author id and write to file_output for each worklog
@@ -41,6 +65,7 @@ def run(since: str) -> Optional[list[dict[str, str | int]]]:
         current += 1
         author = tempo.worklog_author(tempo_id)
         if author is None:
+            logging.warning(f"[worklog_authors] unable to find author for jira_worklog_id {jira_id}")
             continue
         out = {
             'jira_worklog_id': jira_id,

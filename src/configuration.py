@@ -1,15 +1,15 @@
-from pydantic import BaseModel, ValidationError  # , Field, field_validator
+from pydantic import BaseModel, ValidationError, Field
 from keboola.component.exceptions import UserException
 
 
 class Configuration(BaseModel):
     debug: bool = False
     incremental: bool = True
-    org_name: str = ""
-    tempo_token: str = ""
-    user_email: str = ""
-    jira_token: str = ""
-    since: str = ""
+    org_name: str = Field()
+    user_email: str = Field()
+    tempo_token: str = Field()
+    jira_token: str = Field()
+    since: str = Field()
 
     def __init__(self, **data):
         try:

@@ -1,24 +1,13 @@
 import csv
 import logging
 import worklog_author
-
-from jirac import jc
 import tempo
-from datetime import datetime
+import jirac as jc
+
 from keboola.component.base import ComponentBase
 from keboola.component.exceptions import UserException
 
 from configuration import Configuration
-
-
-config = {
-    'jql_select': "key = FVM-4629",
-    'org_name': "csas-test",
-    'tempo_token': "",
-    'user_email': "jiracloud@csas.cz",
-    'jira_token': "",
-    'since': "2024-08-01"
-}
 
 
 class Component(ComponentBase):
@@ -47,17 +36,18 @@ class Component(ComponentBase):
         jc.init(params.org_name, auth_tpl)
         tempo.init(params.tempo_token)
 
-        data = worklog_author.run()
+        data = worklog_author.run(params.since)
         if data is not None and len(data) > 0:
-            headers = data[0].keys()
-            self.create_out_table_definition(worklog_author.FILENAME,
+            coldef = worklog_author.column_definitions()
+            table = self.create_out_table_definition(worklog_author.FILENAME,
                                              incremental=params.incremental,
-                                             primary_key=headers
-                                             # TODO how to define column types?
-                                             # better practice to add headers
-                                             # in definition or in write method
+                                             schema=coldef
                                              )
-            pass
+            with open(table.full_path, "wt", newline="", encoding="utf-8") as out_file:
+                out = csv.DictWriter(out_file, fieldnames=coldef.keys())
+                out.writeheader()
+                out.writerows(data)
+            self.write_manifest(table)
 
         """
         # ####### EXAMPLE TO REMOVE

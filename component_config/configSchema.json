@@ -5,15 +5,42 @@
     "print_hello"
   ],
   "properties": {
-    "print_hello": {
-      "type": "boolean",
-      "title": "Print Hello",
-      "propertyOrder": 1
-    },
     "debug": {
       "type": "boolean",
-      "title": "Debug",
-      "propertyOrder": 2
-    }
+      "title": "Debug:",
+      "propertyOrder": 1000
+    },
+	"incremental": {
+		"type": "boolean",
+		"title": "Incremental:"
+		"propertyOrder": 900
+	},
+	"org_name": {
+		"type": "string",
+		"title": "Organization name:",
+		"description": "https://<org>.atlassian.net",
+		"propertyOrder": 1
+	},
+	"user_email": {
+		"type": "string",
+		"title": "User email:",
+		"propertyOrder": 2
+	},
+	"jira_token": {
+		"type": "string",
+		"title": "Jira token:",
+		"propertyOrder": 3
+	},
+	"tempo_token": {
+		"type": "string",
+		"title": "Temp token:",
+		"propertyOrder": 4
+	},
+	"since": {
+		"type": "string",
+		"title": "Since:",
+		"description": "Format: yyyy-mm-dd",
+		"propertyOrder": 4
+	},
   }
 }

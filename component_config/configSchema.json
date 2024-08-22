@@ -1,50 +1,50 @@
 {
-  "type": "object",
-  "title": "extractor configuration",
-  "required": [
+	"type": "object",
+	"title": "extractor configuration",
+	"required": [
 	  "org_name", "user_email", "#jira_token", "#tempo_token", "since"
-  ],
-  "properties": {
-	"debug": {
-	  "type": "boolean",
-	  "title": "Debug:",
-	  "default": "False",
-	  "propertyOrder": 1000
-	},
-	"incremental": {
-		"type": "boolean",
-		"title": "Incremental:"
-		"default": "False"
-		"propertyOrder": 900
-	},
-	"org_name": {
-		"type": "string",
-		"title": "Organization name:",
-		"description": "https://<org>.atlassian.net",
-		"propertyOrder": 1
-	},
-	"user_email": {
-		"type": "string",
-		"title": "User email:",
-		"propertyOrder": 2
-	},
-	"#jira_token": {
-		"type": "string",
-		"title": "Jira token:",
-		"format": "password",
-		"propertyOrder": 3
-	},
-	"#tempo_token": {
-		"type": "string",
-		"title": "Temp token:",
-		"format": "password",
-		"propertyOrder": 4
-	},
-	"since": {
-		"type": "string",
-		"title": "Since:",
-		"description": "Format: yyyy-mm-dd",
-		"propertyOrder": 4
+	],
+	"properties": {
+		"debug": {
+		  "type": "boolean",
+		  "title": "Debug:",
+		  "default": "False",
+		  "propertyOrder": 1000
+		},
+		"incremental": {
+			"type": "boolean",
+			"title": "Incremental:",
+			"default": "False",
+			"propertyOrder": 900
+		},
+		"org_name": {
+			"type": "string",
+			"title": "Organization name:",
+			"description": "https://<org>.atlassian.net",
+			"propertyOrder": 1
+		},
+		"user_email": {
+			"type": "string",
+			"title": "User email:",
+			"propertyOrder": 2
+		},
+		"#jira_token": {
+			"type": "string",
+			"title": "Jira token:",
+			"format": "password",
+			"propertyOrder": 3
+		},
+		"#tempo_token": {
+			"type": "string",
+			"title": "Temp token:",
+			"format": "password",
+			"propertyOrder": 4
+		},
+		"since": {
+			"type": "string",
+			"title": "Since:",
+			"description": "Format: yyyy-mm-dd",
+			"propertyOrder": 4
+		}
 	}
-  }
 }

@@ -2,17 +2,19 @@
   "type": "object",
   "title": "extractor configuration",
   "required": [
-    "print_hello"
+	  "org_name", "user_email", "#jira_token", "#tempo_token", "since"
   ],
   "properties": {
-    "debug": {
-      "type": "boolean",
-      "title": "Debug:",
-      "propertyOrder": 1000
-    },
+	"debug": {
+	  "type": "boolean",
+	  "title": "Debug:",
+	  "default": "False",
+	  "propertyOrder": 1000
+	},
 	"incremental": {
 		"type": "boolean",
 		"title": "Incremental:"
+		"default": "False"
 		"propertyOrder": 900
 	},
 	"org_name": {
@@ -43,6 +45,6 @@
 		"title": "Since:",
 		"description": "Format: yyyy-mm-dd",
 		"propertyOrder": 4
-	},
+	}
   }
 }

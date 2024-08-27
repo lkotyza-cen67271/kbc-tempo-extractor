@@ -36,11 +36,11 @@ class Component(ComponentBase):
         jc.init(params.org_name, auth_tpl)
         tempo.init(params.tempo_token)
 
+        # worklog authors
         since_mls = self.parse_since_to_timestamp(params.since)
         data = worklog_author.run(since_mls)
         if data is not None and len(data) > 0:
             coldef = worklog_author.column_definitions()
-            logging.debug(coldef)
             table = self.create_out_table_definition(worklog_author.FILENAME,
                                                      incremental=params.incremental,
                                                      schema=coldef

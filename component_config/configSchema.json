@@ -36,7 +36,7 @@
 		},
 		"#tempo_token": {
 			"type": "string",
-			"title": "Temp token:",
+			"title": "Tempo token:",
 			"format": "password",
 			"propertyOrder": 4
 		},

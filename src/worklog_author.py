@@ -18,13 +18,13 @@ def column_definitions() -> dict[str, ColumnDefinition]:
             data_types=BaseType(dtype=SupportedDataTypes.INTEGER, length="20"),
             nullable=False,
             primary_key=True,
-            description="Jira worklog id"
+            description="Jira worklog id - [WORKLOG].[id]"
         ),
         COL_AUTHOR_ID: ColumnDefinition(
             data_types=BaseType(dtype=SupportedDataTypes.STRING, length="200"),
             nullable=False,
             primary_key=False,
-            description="Jira user id"
+            description="Jira user id - [APP_USER].[account_id]"
         )
     }
 
@@ -55,11 +55,9 @@ def run(since_mls: int) -> Optional[list[dict[str, str | int]]]:
         logging.error("Failed to get mapping")
         return
     logging.debug("[worklog_authors] finished mapping jira to tempo")
-    # get author id and write to file_output for each worklog
-    current = -1
+    # get author id
     file_ouput = []
     for tempo_id, jira_id in mapped.items():
-        current += 1
         author = tempo.worklog_author(tempo_id)
         if author is None:
             logging.warning(f"[worklog_authors] unable to find author for jira_worklog_id {jira_id}")

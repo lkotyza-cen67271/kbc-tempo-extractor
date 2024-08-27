@@ -40,13 +40,13 @@ class Component(ComponentBase):
         data = worklog_author.run(since_mls)
         if data is not None and len(data) > 0:
             coldef = worklog_author.column_definitions()
+            logging.debug(coldef)
             table = self.create_out_table_definition(worklog_author.FILENAME,
                                                      incremental=params.incremental,
                                                      schema=coldef
                                                      )
             with open(table.full_path, "wt", newline="", encoding="utf-8") as out_file:
                 out = csv.DictWriter(out_file, fieldnames=coldef.keys())
-                out.writeheader()
                 out.writerows(data)
             self.write_manifest(table)
 

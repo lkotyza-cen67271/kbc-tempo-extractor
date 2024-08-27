@@ -7,8 +7,8 @@ class Configuration(BaseModel):
     incremental: bool = True
     org_name: str = Field()
     user_email: str = Field()
-    tempo_token: str = Field()
-    jira_token: str = Field()
+    tempo_token: str = Field(alias="#tempo_token")
+    jira_token: str = Field(alias="#jira_token")
     since: str = Field()
 
     def __init__(self, **data):

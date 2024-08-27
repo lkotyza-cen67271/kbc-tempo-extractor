@@ -1,5 +1,4 @@
 from typing import Optional
-from datetime import datetime as dt
 
 from keboola.component.dao import BaseType, ColumnDefinition, SupportedDataTypes
 import jirac as jc
@@ -30,12 +29,12 @@ def column_definitions() -> dict[str, ColumnDefinition]:
     }
 
 
-def run(since: str) -> Optional[list[dict[str, str | int]]]:
+def run(since_mls: int) -> Optional[list[dict[str, str | int]]]:
     """
     loads jira worklog ids from 'since' and
     maps them to tempo worklog id and than finds author info from tempo
 
-    since: isoformat date '2020-01-30'
+    since_mls: timestamp in miliseconds
 
     returns
     [
@@ -44,8 +43,6 @@ def run(since: str) -> Optional[list[dict[str, str | int]]]:
     ]
     """
     logging.info("started worklog_authors")
-    date_from = dt.fromisoformat(since)
-    since_mls = int(date_from.timestamp()) * 1_000
     # load jira worklog ids
     worklog_ids = jc.worklog_ids(since_mls)
     if worklog_ids is None:

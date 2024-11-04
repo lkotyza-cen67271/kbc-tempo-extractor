@@ -1,9 +1,11 @@
 import csv
 import logging
+import approvals
 import worklog_author
 import tempo
 import jirac as jc
 import dateparser as dp
+from datetime import datetime
 from keboola.component.base import ComponentBase
 from keboola.component.exceptions import UserException
 
@@ -36,21 +38,28 @@ class Component(ComponentBase):
         jc.init(params.org_name, auth_tpl)
         tempo.init(params.tempo_token)
 
-        # worklog authors
-        since_mls = self.parse_since_to_timestamp(params.since)
-        data = worklog_author.run(since_mls)
-        if data is not None and len(data) > 0:
-            coldef = worklog_author.column_definitions()
-            table = self.create_out_table_definition(worklog_author.FILENAME,
-                                                     incremental=params.incremental,
-                                                     schema=coldef
-                                                     )
-            with open(table.full_path, "wt", newline="", encoding="utf-8") as out_file:
-                out = csv.DictWriter(out_file, fieldnames=coldef.keys())
-                out.writerows(data)
-            self.write_manifest(table)
+        since_date = self.parse_since_to_datetime(params.since)
 
-    def parse_since_to_timestamp(self, raw_since: str) -> int:
+        # worklog authors
+        if "worklog_authors" in params.datasets:
+            since_mls = int(since_date.timestamp()) * 1_000
+            data = worklog_author.run(since_mls)
+            if data is not None and len(data) > 0:
+                coldef = worklog_author.column_definitions()
+                table = self.create_out_table_definition(worklog_author.FILENAME,
+                                                         incremental=params.incremental,
+                                                         schema=coldef
+                                                         )
+                with open(table.full_path, "wt", newline="", encoding="utf-8") as out_file:
+                    out = csv.DictWriter(out_file, fieldnames=coldef.keys())
+                    out.writerows(data)
+                self.write_manifest(table)
+        # Approvals for A830_04
+        if "approvals_A830_04" in params.datasets:
+            approvals.run(since_date)
+
+
+    def parse_since_to_datetime(self, raw_since: str) -> datetime:
         parser = dp.date.DateDataParser(languages=["en"])
         date_data = parser.get_date_data(raw_since)
         if date_data is None:
@@ -58,8 +67,7 @@ class Component(ComponentBase):
         date_from = date_data.date_obj
         if date_from is None:
             raise UserException("datetime is empty")
-        since_mls = int(date_from.timestamp()) * 1_000
-        return since_mls
+        return date_from
 
 
 """

@@ -10,6 +10,7 @@ class Configuration(BaseModel):
     tempo_token: str = Field(alias="#tempo_token")
     jira_token: str = Field(alias="#jira_token")
     since: str = Field()
+    datasets: list[str] = Field()
 
     def __init__(self, **data):
         try:

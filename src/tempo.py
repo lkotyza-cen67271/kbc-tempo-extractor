@@ -14,6 +14,39 @@ def init(token):
     }
 
 
+def tempo_to_jira_worklog_ids(tempo_worklog_ids: list[int]) -> Optional[dict[int, int]]:
+    """
+        maps between tempo worklog id and jira worklog id
+
+        tempo_worklog_ids: list of unique tempo worklog ids
+
+        returns {
+            [tempo_worklog_id : int]: [jira_worklog_id : int],
+            ...
+        }
+    """
+    result = {}
+    req = {
+        'tempoWorklogIds': tempo_worklog_ids
+    }
+    resp = _raw_post("/worklogs/tempo-to-jira?limit=500", data=req)
+    if resp is None or (resp.status_code < 200 or resp.status_code >= 300):
+        return
+    data = resp.json()
+    for map in data['results']:
+        result[map['tempoWorklogId']] = map['jiraWorklogId']
+    next = _parse_next(data['metadata'])
+    while next is not None:
+        resp = _raw_post(next, data=req)
+        if resp.status_code < 200 or resp.status_code >= 300:
+            continue
+        data = resp.json()
+        for map in data['results']:
+            result[map['tempoWorklogId']] = map['jiraWorklogId']
+        next = _parse_next(data['metadata'])
+    return result
+
+
 def jira_to_tempo_worklog_ids(jira_worklog_ids: list[int]) -> Optional[dict[int, int]]:
     """
         maps between jira worklog id and internal tempo worklog
@@ -47,6 +80,105 @@ def jira_to_tempo_worklog_ids(jira_worklog_ids: list[int]) -> Optional[dict[int,
             result[map['tempoWorklogId']] = map['jiraWorklogId']
         next = _parse_next(data['metadata'])
     return result
+
+
+def teams() -> Optional[list[dict]]:
+    """
+    List of teams in tempo
+    
+    returns [
+        { id: text, summary: text, name: text, members: link }, ...
+    ]
+    """
+    teams = []
+    req = {
+        "offset": 0,
+        "limit": 50
+    }
+    resp = _raw_get("/teams", params=req)
+    if resp is None or (resp.status_code < 200 or resp.status_code >= 300):
+        #log.error("tempo.teams", "resp is None or status is not 2xx")
+        return
+    data = resp.json()
+    teams.extend(data['results'])
+    next = _parse_next(data['metadata'])
+    while next is not None:
+        resp = _raw_get(next, params=req)
+        if resp.status_code < 200 or resp.status_code >= 300:
+            #log.error("tempo.teams", "resp is None or status is not 2xx")
+            continue
+        data = resp.json()
+        teams.extend(data['results'])
+        next = _parse_next(data['metadata'])
+    return teams
+
+
+def team_timesheet_approvals(team_id: int, date_from: str, load_worklogs: bool = True) -> Optional[list[dict]]:
+    """
+    timesheet approvals for specific team in Tempo Period
+
+    team_id: int - id of the team
+    date_from: str - date format yyyy-mm-dd
+    load_worklogs: load worklogs for approvals
+    """
+    results: list[dict] = []
+    req = {
+        "from": date_from
+    }
+    resp = _raw_get(f"/timesheet-approvals/team/{team_id}", params=req)
+    if resp.status_code < 200 or resp.status_code >= 300:
+        #log.error("tempo.team_timesheet_approvals", "resp is None or status is not 2xx")
+        return
+    data = resp.json()
+    counter = 0
+    for approval in data['results']:
+        #log.status_line(counter, data['metadata']['count'], "Processing timesheet approvals")
+        counter += 1
+        out = {
+            "period": approval['period'],
+            "status": approval['status']['key'],
+            "user": approval['user']['accountId'],
+            "worklogs": []
+        }
+        if load_worklogs:
+            tempo_worklog_ids = []
+            worklogs = _worklogs_from_approval(approval)
+            if worklogs is None:
+                continue
+            for worklog in worklogs:
+                tempo_worklog_ids.append(worklog['tempoWorklogId'])
+            map_ttj = tempo_to_jira_worklog_ids(tempo_worklog_ids)
+            if map_ttj is None:
+                continue
+            out['worklogs'] = list(map_ttj.values())
+        results.append(out)
+    return results
+
+
+def _worklogs_from_approval(approval: dict) -> Optional[list[dict]]:
+    worklogs_url = str(approval['worklogs']['self'])
+    parsed_url = str(worklogs_url[len(_base_url):])
+    results = []
+    # Load first page
+    resp = _raw_get(parsed_url)
+    if resp.status_code < 200 or resp.status_code >= 300:
+        #log.error("tempo._worklogs_from_approval", "resp is None or status is not 2xx")
+        return
+    data = resp.json()
+    results.extend(data['results'])
+    next = _parse_next(data['metadata'])
+    # Load rest of the pages if exists
+    while next is not None:
+        resp = _raw_get(next)
+        if resp.status_code < 200 or resp.status_code >= 300:
+            #log.error("tempo._worklogs_from_approval", "resp is None or status is not 2xx")
+            continue
+        data = resp.json()
+        results.extend(data['results'])
+        next = _parse_next(data['metadata'])
+    return results
+
+
 
 
 def worklog_author(worklog_id: int) -> Optional[str]:

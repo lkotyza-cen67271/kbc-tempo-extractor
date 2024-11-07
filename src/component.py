@@ -1,5 +1,7 @@
 import csv
 import logging
+
+from keboola.component.dao import TableDefinition
 import approvals
 import worklog_author
 import tempo
@@ -38,7 +40,7 @@ class Component(ComponentBase):
         jc.init(params.org_name, auth_tpl)
         tempo.init(params.tempo_token)
 
-        since_date = self.parse_since_to_datetime(params.since)
+        since_date = self._parse_since_to_datetime(params.since)
 
         # worklog authors
         if "worklog_authors" in params.datasets:
@@ -50,15 +52,30 @@ class Component(ComponentBase):
                                                          incremental=params.incremental,
                                                          schema=coldef
                                                          )
-                with open(table.full_path, "wt", newline="", encoding="utf-8") as out_file:
-                    out = csv.DictWriter(out_file, fieldnames=coldef.keys())
-                    out.writerows(data)
-                self.write_manifest(table)
+                self.write_out_data(table, list(coldef.keys()), data)
+
         # Approvals for A830_04
         if "approvals_A830_04" in params.datasets:
-            approvals.run(since_date)
+            logging.info("approvals")
+            approvals_data, appr_worklogs_data = approvals.run(since_date)
+            coldefs = approvals.table_column_definitions()
+            logging.info(f"{len(approvals_data)}, {len(appr_worklogs_data)}")
+            if approvals_data is not None and len(approvals_data) > 0:
+                table = self.create_out_table_definition(
+                    approvals.FILENAME_APPROVALS,
+                    incremental=params.incremental,
+                    schema=coldefs[approvals._TABLE_APPROVALS]
+                )
+                self.write_out_data(table, list(coldefs[approvals._TABLE_APPROVALS].keys()), approvals_data)
+            if appr_worklogs_data is not None and len(appr_worklogs_data) > 0:
+                table = self.create_out_table_definition(
+                    approvals.FILENAME_APPROVAL_WORKLOGS,
+                    incremental=params.incremental,
+                    schema=coldefs[approvals._TABLE_APPROVAL_WORKLOGS]
+                )
+                self.write_out_data(table, list(coldefs[approvals._TABLE_APPROVAL_WORKLOGS].keys()), appr_worklogs_data)
 
-    def parse_since_to_datetime(self, raw_since: str) -> datetime:
+    def _parse_since_to_datetime(self, raw_since: str) -> datetime:
         parser = dp.date.DateDataParser(languages=["en"])
         date_data = parser.get_date_data(raw_since)
         if date_data is None:
@@ -67,6 +84,15 @@ class Component(ComponentBase):
         if date_from is None:
             raise UserException("datetime is empty")
         return date_from
+
+    def write_out_data(self,
+                       table: TableDefinition,
+                       fieldnames: list[str],
+                       data: list[dict]):
+        with open(table.full_path, "wt", newline="", encoding="utf-8") as out_file:
+            out = csv.DictWriter(out_file, fieldnames=fieldnames)
+            out.writerows(data)
+        self.write_manifest(table)
 
 
 """

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.10
 from keboola.component.dao import BaseType, ColumnDefinition, SupportedDataTypes
-from datetime import datetime
+from datetime import datetime, timedelta
 import tempo
 import uuid
 from typing import Optional
@@ -70,38 +70,38 @@ def table_column_definitions() -> dict[str, dict[str, ColumnDefinition]]:
         }}
 
 
-def run(since: datetime) -> Optional[tuple[list[dict], list[dict]]]:
+def run(since: datetime) -> tuple[list[dict], list[dict]]:
     # Load Team info
     all_teams = tempo.teams()
     if all_teams is None:
-        return
+        return ([], [])
     itrp_team_id: Optional[int] = None
     for team in all_teams:
         if team['name'] == "A830_04 IT Resource Pool":
             itrp_team_id = team['id']
     if itrp_team_id is None:
-        return
+        return ([], [])
 
     # Load Approvals
     raw_out: list[dict] = []
-    end_date = since
-    while end_date < datetime.now():
-        period = tempo.team_timesheet_approvals(itrp_team_id, str(end_date.date()))
+    period_start_date = since
+    while period_start_date < datetime.now():
+        period = tempo.team_timesheet_approvals(itrp_team_id, str(period_start_date.date()))
         if period is None:
-            return
+            return ([], [])
         raw_out.extend(period)
-        end_date = _period_end_date_from_approvals(period)
-        if end_date is None:
-            return
+        period_start_date = _next_period_start_from_current(period)
+        if period_start_date is None:
+            return ([], [])
 
     out = _transform_periods_for_keboola(all_periods=raw_out)
     return out
 
 
-def _period_end_date_from_approvals(approvals: list[dict]) -> Optional[datetime]:
+def _next_period_start_from_current(approvals: list[dict]) -> Optional[datetime]:
     if len(approvals) == 0:
         return
-    return datetime.fromisoformat(approvals[0]['period']['to'])
+    return datetime.fromisoformat(approvals[0]['period']['to']) + timedelta(days=1)
 
 
 def _timestamp_from_iso_str(iso_str: str) -> float:

@@ -58,7 +58,6 @@ class Component(ComponentBase):
         if "approvals_A830_04" in params.datasets:
             approvals.run(since_date)
 
-
     def parse_since_to_datetime(self, raw_since: str) -> datetime:
         parser = dp.date.DateDataParser(languages=["en"])
         date_data = parser.get_date_data(raw_since)

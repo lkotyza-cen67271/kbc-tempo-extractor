@@ -59,7 +59,6 @@ class Component(ComponentBase):
             logging.info("approvals")
             approvals_data, appr_worklogs_data = approvals.run(since_date)
             coldefs = approvals.table_column_definitions()
-            logging.info(f"{len(approvals_data)}, {len(appr_worklogs_data)}")
             if approvals_data is not None and len(approvals_data) > 0:
                 table = self.create_out_table_definition(
                     approvals.FILENAME_APPROVALS,

@@ -2,7 +2,7 @@
 	"type": "object",
 	"title": "extractor configuration",
 	"required": [
-		"org_name", "user_email", "#jira_token", "#tempo_token", "since"
+		"org_name", "user_email", "#jira_token", "#tempo_token", "since", "datasets"
 	],
 	"properties": {
 		"debug": {
@@ -49,7 +49,7 @@
 		"datasets": {
 			"type": "array",
 			"format": "select",
-			"title": "Datasets",
+			"title": "Datasets:",
 			"description": "",
 			"uniqueItems": true,
 			"items": {

@@ -3,6 +3,7 @@ import logging
 
 from keboola.component.dao import TableDefinition
 import approvals
+import team_membership
 import worklog_author
 import tempo
 import jirac as jc
@@ -48,13 +49,14 @@ class Component(ComponentBase):
             data = worklog_author.run(since_mls)
             if data is not None and len(data) > 0:
                 coldef = worklog_author.column_definitions()
-                table = self.create_out_table_definition(worklog_author.FILENAME,
-                                                         incremental=params.incremental,
-                                                         schema=coldef
-                                                         )
+                table = self.create_out_table_definition(
+                    worklog_author.FILENAME,
+                    incremental=params.incremental,
+                    schema=coldef
+                )
                 self.write_out_data(table, list(coldef.keys()), data)
 
-        # Approvals for A830_04
+        # Approvals
         if "approvals_A830_04" in params.datasets:
             logging.info("approvals")
             approvals_data, appr_worklogs_data = approvals.run(since_date)
@@ -73,6 +75,28 @@ class Component(ComponentBase):
                     schema=coldefs[approvals._TABLE_APPROVAL_WORKLOGS]
                 )
                 self.write_out_data(table, list(coldefs[approvals._TABLE_APPROVAL_WORKLOGS].keys()), appr_worklogs_data)
+
+        # Teams & Membership
+        if "teams" in params.datasets:
+            logging.info("teams")
+            teams_data = team_membership.run()
+            coldefs = team_membership.table_column_definitions()
+            teams = teams_data[team_membership._TABLE_TEAMS] 
+            if teams is not None and len(teams) > 0:
+                table = self.create_out_table_definition(
+                    team_membership.FILENAME_TEAMS,
+                    incremental=params.incremental,
+                    schema=coldefs[team_membership._TABLE_TEAMS]
+                )
+                self.write_out_data( table=table, fieldnames=list(coldefs[team_membership._TABLE_TEAMS].keys()), data=teams)
+            membership = teams_data[team_membership._TABLE_TEAM_MEMBERSHIPS]
+            if membership is not None and len(membership) > 0:
+                table = self.create_out_table_definition(
+                    team_membership.FILENAME_TEAM_MEMBERSHIPS,
+                    incremental=params.incremental,
+                    schema=coldefs[team_membership._TABLE_TEAM_MEMBERSHIPS]
+                )
+                self.write_out_data(table=table, fieldnames=list(coldefs[team_membership._TABLE_TEAM_MEMBERSHIPS].keys()), data=membership)
 
     def _parse_since_to_datetime(self, raw_since: str) -> datetime:
         parser = dp.date.DateDataParser(languages=["en"])

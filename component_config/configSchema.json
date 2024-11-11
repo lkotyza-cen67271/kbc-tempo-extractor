@@ -56,12 +56,14 @@
 				"options": {
 					"enum_titles": [
 						"Worklog Authors",
-						"Approvals (A830_04 IT Resource Pool)"
+						"Approvals",
+						"Teams and Membership"
 					]
 				},
 				"enum": [
 					"worklog_authors",
-					"approvals_A830_04"
+					"approvals",
+					"teams"
 				],
 				"type": "string"
 			},

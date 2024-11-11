@@ -14,6 +14,7 @@ _TABLE_APPROVAL_WORKLOGS = "approval_worklogs"
 _COL_APPR_ID = "approval_id"
 _COL_WL_ID = "worklog_id"
 _COL_ID = "id"
+_COL_TEAM_ID = "team_id"
 _COL_START = "period_start"
 _COL_END = "period_end"
 _COL_USER = "account_id"
@@ -27,7 +28,7 @@ def table_column_definitions() -> dict[str, dict[str, ColumnDefinition]]:
                 data_types=BaseType(dtype=SupportedDataTypes.INTEGER, length="20"),
                 nullable=False,
                 primary_key=True,
-                description="Approval ID"
+                description="Worklog ID"
             ),
             _COL_APPR_ID: ColumnDefinition(
                 data_types=BaseType(dtype=SupportedDataTypes.STRING, length="100"),
@@ -42,6 +43,12 @@ def table_column_definitions() -> dict[str, dict[str, ColumnDefinition]]:
                 nullable=False,
                 primary_key=True,
                 description="Approval ID"
+            ),
+            _COL_TEAM_ID: ColumnDefinition(
+                data_types=BaseType(dtype=SupportedDataTypes.INTEGER, length="20"),
+                nullable=False,
+                primary_key=False,
+                description="Team ID"
             ),
             _COL_START: ColumnDefinition(
                 data_types=BaseType(dtype=SupportedDataTypes.TIMESTAMP),
@@ -71,31 +78,35 @@ def table_column_definitions() -> dict[str, dict[str, ColumnDefinition]]:
 
 
 def run(since: datetime) -> tuple[list[dict], list[dict]]:
+    """
+    since: datetime
+
+    returns tupple(approvals, approval_worklogs)
+    """
     # Load Team info
     all_teams = tempo.teams()
     if all_teams is None:
         return ([], [])
-    itrp_team_id: Optional[int] = None
+    result: dict[str, list] = {
+        "approvals": [],
+        "approval_worklogs": []
+    }
     for team in all_teams:
-        if team['name'] == "A830_04 IT Resource Pool":
-            itrp_team_id = team['id']
-    if itrp_team_id is None:
-        return ([], [])
-
-    # Load Approvals
-    raw_out: list[dict] = []
-    period_start_date = since
-    while period_start_date < datetime.now():
-        period = tempo.team_timesheet_approvals(itrp_team_id, str(period_start_date.date()))
-        if period is None:
-            return ([], [])
-        raw_out.extend(period)
-        period_start_date = _next_period_start_from_current(period)
-        if period_start_date is None:
-            return ([], [])
-
-    out = _transform_periods_for_keboola(all_periods=raw_out)
-    return out
+        # Load Approvals per team
+        raw_out: list[dict] = []
+        period_start_date = since
+        while period_start_date < datetime.now():
+            period = tempo.team_timesheet_approvals(team['id'], str(period_start_date.date()))
+            if period is None:
+                return ([], [])
+            raw_out.extend(period)
+            period_start_date = _next_period_start_from_current(period)
+            if period_start_date is None:
+                return ([], [])
+        appr, appr_worklogs = _transform_periods_for_keboola(all_periods=raw_out, team_id=team['id'])
+        result['approvals'].extend(appr)
+        result['approval_worklogs'].extend(appr_worklogs)
+    return (result['approvals'], result['approval_worklogs'])
 
 
 def _next_period_start_from_current(approvals: list[dict]) -> Optional[datetime]:
@@ -109,7 +120,7 @@ def _timestamp_from_iso_str(iso_str: str) -> float:
     return dt.timestamp()
 
 
-def _transform_periods_for_keboola(all_periods: list[dict]) -> tuple[list[dict], list[dict]]:
+def _transform_periods_for_keboola(all_periods: list[dict], team_id: int) -> tuple[list[dict], list[dict]]:
     """
         Data for keboola needs to be transformed to flat structure coresponding to the table scheme
 
@@ -121,6 +132,7 @@ def _transform_periods_for_keboola(all_periods: list[dict]) -> tuple[list[dict],
         appr_id = uuid.uuid4()
         appr_out = {
             _COL_ID: appr_id,
+            _COL_TEAM_ID: team_id,
             _COL_START: _timestamp_from_iso_str(period['period']['from']),
             _COL_END: _timestamp_from_iso_str(period['period']['to']),
             _COL_STATUS: period['status'],

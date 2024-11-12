@@ -74,21 +74,29 @@ class Component(ComponentBase):
                     incremental=params.incremental,
                     schema=coldefs[approvals._TABLE_APPROVAL_WORKLOGS]
                 )
-                self.write_out_data(table, list(coldefs[approvals._TABLE_APPROVAL_WORKLOGS].keys()), appr_worklogs_data)
+                self.write_out_data(
+                    table,
+                    list(coldefs[approvals._TABLE_APPROVAL_WORKLOGS].keys()),
+                    appr_worklogs_data
+                )
 
         # Teams & Membership
         if "teams" in params.datasets:
             logging.info("teams")
             teams_data = team_membership.run()
             coldefs = team_membership.table_column_definitions()
-            teams = teams_data[team_membership._TABLE_TEAMS] 
+            teams = teams_data[team_membership._TABLE_TEAMS]
             if teams is not None and len(teams) > 0:
                 table = self.create_out_table_definition(
                     team_membership.FILENAME_TEAMS,
                     incremental=params.incremental,
                     schema=coldefs[team_membership._TABLE_TEAMS]
                 )
-                self.write_out_data( table=table, fieldnames=list(coldefs[team_membership._TABLE_TEAMS].keys()), data=teams)
+                self.write_out_data(
+                    table=table,
+                    fieldnames=list(coldefs[team_membership._TABLE_TEAMS].keys()),
+                    data=teams
+                )
             membership = teams_data[team_membership._TABLE_TEAM_MEMBERSHIPS]
             if membership is not None and len(membership) > 0:
                 table = self.create_out_table_definition(
@@ -96,7 +104,11 @@ class Component(ComponentBase):
                     incremental=params.incremental,
                     schema=coldefs[team_membership._TABLE_TEAM_MEMBERSHIPS]
                 )
-                self.write_out_data(table=table, fieldnames=list(coldefs[team_membership._TABLE_TEAM_MEMBERSHIPS].keys()), data=membership)
+                self.write_out_data(
+                    table=table,
+                    fieldnames=list(coldefs[team_membership._TABLE_TEAM_MEMBERSHIPS].keys()),
+                    data=membership
+                )
 
     def _parse_since_to_datetime(self, raw_since: str) -> datetime:
         parser = dp.date.DateDataParser(languages=["en"])

@@ -1,8 +1,7 @@
 #!/usr/bin/env python3.10
 from keboola.component.dao import BaseType, ColumnDefinition, SupportedDataTypes
 import tempo
-import uuid
-from typing import Any, Optional
+from typing import Optional
 
 
 FILENAME_TEAMS = "teams.csv"
@@ -16,6 +15,7 @@ _COL_USER_ID = "account_id"
 _COL_ID = "id"
 _COL_LEAD_ID = "team_lead_id"
 _COL_TEAM_NAME = "team_name"
+
 
 def table_column_definitions() -> dict[str, dict[str, ColumnDefinition]]:
     return {
@@ -61,13 +61,13 @@ def run() -> dict[str, Optional[list[dict]]]:
     # Process Teams
     teams = tempo.teams()
     if teams is None:
-        return { _TABLE_TEAMS: None, _TABLE_TEAM_MEMBERSHIPS: None }
+        return {_TABLE_TEAMS: None, _TABLE_TEAM_MEMBERSHIPS: None}
     for team in teams:
         team_data.append(_transform_team(team))
         # Load Users in Team
         memberships = tempo.team_membership(team['id'])
         if memberships is None:
-            return { _TABLE_TEAMS: None, _TABLE_TEAM_MEMBERSHIPS: None }
+            return {_TABLE_TEAMS: None, _TABLE_TEAM_MEMBERSHIPS: None}
         for membership in memberships:
             team_membership_data.append(_transform_team_membership(membership))
     return {

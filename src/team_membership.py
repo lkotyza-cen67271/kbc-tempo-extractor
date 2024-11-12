@@ -42,7 +42,7 @@ def table_column_definitions() -> dict[str, dict[str, ColumnDefinition]]:
             ),
             _COL_LEAD_ID: ColumnDefinition(
                 data_types=BaseType(dtype=SupportedDataTypes.STRING, length="100"),
-                nullable=False,
+                nullable=True,
                 primary_key=False,
                 description="Team Lead's account_id"
             ),
@@ -76,11 +76,11 @@ def run() -> dict[str, Optional[list[dict]]]:
     }
 
 
-def _transform_team(team: dict) -> dict[str, str | int]:
+def _transform_team(team: dict) -> dict[str, str | int | None]:
     return {
         _COL_ID: team['id'],
         _COL_TEAM_NAME: team['name'],
-        _COL_LEAD_ID: team['lead']['accountId']
+        _COL_LEAD_ID: team['lead']['accountId'] if team['lead'] is not None else None
     }
 
 

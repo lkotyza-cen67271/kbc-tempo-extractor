@@ -57,8 +57,8 @@ class Component(ComponentBase):
                 self.write_out_data(table, list(coldef.keys()), data)
 
         # Approvals
-        if "approvals_A830_04" in params.datasets:
-            logging.info("approvals")
+        if "approvals" in params.datasets:
+            logging.debug("approvals")
             approvals_data, appr_worklogs_data = approvals.run(since_date)
             coldefs = approvals.table_column_definitions()
             if approvals_data is not None and len(approvals_data) > 0:
@@ -82,7 +82,7 @@ class Component(ComponentBase):
 
         # Teams & Membership
         if "teams" in params.datasets:
-            logging.info("teams")
+            logging.debug("teams")
             teams_data = team_membership.run()
             coldefs = team_membership.table_column_definitions()
             teams = teams_data[team_membership._TABLE_TEAMS]

@@ -82,9 +82,21 @@ def jira_to_tempo_worklog_ids(jira_worklog_ids: list[int]) -> Optional[dict[int,
     return result
 
 
+def team_membership(team_id: int) -> Optional[list[dict]]:
+    """
+    List of users in Tempo Team. https://apidocs.tempo.io/#tag/Team-Memberships/operation/getAllMemberships
+    """
+    resp = _raw_get(f"/team-memberships/team/{team_id}")
+    if resp is None or (resp.status_code < 200 or resp.status_code >= 300):
+        # log.error("tempo.team_memberships", "resp is None or status is not 2xx")
+        return
+    data = resp.json()
+    return data['results']
+
+
 def teams() -> Optional[list[dict]]:
     """
-    List of teams in tempo
+    List of teams in tempo. https://apidocs.tempo.io/#tag/Team
 
     returns [
         { id: text, summary: text, name: text, members: link }, ...

@@ -55,6 +55,8 @@ class Component(ComponentBase):
                     schema=coldef
                 )
                 self.write_out_data(table, list(coldef.keys()), data)
+            else:
+                logging.warning("no worklog_author")
 
         # Approvals
         if "approvals" in params.datasets:
@@ -68,6 +70,8 @@ class Component(ComponentBase):
                     schema=coldefs[approvals._TABLE_APPROVALS]
                 )
                 self.write_out_data(table, list(coldefs[approvals._TABLE_APPROVALS].keys()), approvals_data)
+            else:
+                logging.warning("no approvals")
             if appr_worklogs_data is not None and len(appr_worklogs_data) > 0:
                 table = self.create_out_table_definition(
                     approvals.FILENAME_APPROVAL_WORKLOGS,
@@ -79,6 +83,8 @@ class Component(ComponentBase):
                     list(coldefs[approvals._TABLE_APPROVAL_WORKLOGS].keys()),
                     appr_worklogs_data
                 )
+            else:
+                logging.warning("no appr_worklogs_data")
 
         # Teams & Membership
         if "teams" in params.datasets:
@@ -97,6 +103,8 @@ class Component(ComponentBase):
                     fieldnames=list(coldefs[team_membership._TABLE_TEAMS].keys()),
                     data=teams
                 )
+            else:
+                logging.warning("no teams")
             membership = teams_data[team_membership._TABLE_TEAM_MEMBERSHIPS]
             if membership is not None and len(membership) > 0:
                 table = self.create_out_table_definition(
@@ -109,6 +117,8 @@ class Component(ComponentBase):
                     fieldnames=list(coldefs[team_membership._TABLE_TEAM_MEMBERSHIPS].keys()),
                     data=membership
                 )
+            else:
+                logging.warning("no team membership")
 
     def _parse_since_to_datetime(self, raw_since: str) -> datetime:
         parser = dp.date.DateDataParser(languages=["en"])

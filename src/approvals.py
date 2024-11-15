@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.10
-from keboola.component.dao import BaseType, ColumnDefinition, SupportedDataTypes
+from keboola.component.dao import BaseType, ColumnDefinition, SupportedDataTypes, logging
 from datetime import datetime, timedelta
 import tempo
 import uuid
@@ -98,11 +98,14 @@ def run(since: datetime) -> tuple[list[dict], list[dict]]:
         while period_start_date < datetime.now():
             period = tempo.team_timesheet_approvals(team['id'], str(period_start_date.date()))
             if period is None:
+                logging.debug("period is None")
                 return ([], [])
             raw_out.extend(period)
-            period_start_date = _next_period_start_from_current(period)
-            if period_start_date is None:
-                return ([], [])
+            next_period_start_date = _next_period_start_from_current(period)
+            if next_period_start_date is None:
+                logging.debug("period_start_date is None increment manually (+1week)")
+                next_period_start_date = period_start_date + timedelta(weeks=1)
+            period_start_date = next_period_start_date
         appr, appr_worklogs = _transform_periods_for_keboola(all_periods=raw_out, team_id=team['id'])
         result['approvals'].extend(appr)
         result['approval_worklogs'].extend(appr_worklogs)

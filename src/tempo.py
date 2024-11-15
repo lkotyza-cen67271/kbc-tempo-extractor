@@ -1,3 +1,4 @@
+from keboola.component.dao import logging
 from requests import Session, Response
 import json
 from typing import Optional
@@ -146,7 +147,7 @@ def team_timesheet_approvals(team_id: int, date_from: str, load_worklogs: bool =
     }
     resp = _raw_get(f"/timesheet-approvals/team/{team_id}", params=req)
     if resp.status_code < 200 or resp.status_code >= 300:
-        # log.error("tempo.team_timesheet_approvals", "resp is None or status is not 2xx")
+        logging.error("tempo.team_timesheet_approvals", "resp is None or status is not 2xx")
         return
     data = resp.json()
     counter = 0

@@ -51,13 +51,13 @@ def table_column_definitions() -> dict[str, dict[str, ColumnDefinition]]:
                 description="Team ID"
             ),
             _COL_START: ColumnDefinition(
-                data_types=BaseType(dtype=SupportedDataTypes.TIMESTAMP),
+                data_types=BaseType(dtype=SupportedDataTypes.DATE),
                 nullable=False,
                 primary_key=False,
                 description="Approval period START date"
             ),
             _COL_END: ColumnDefinition(
-                data_types=BaseType(dtype=SupportedDataTypes.TIMESTAMP),
+                data_types=BaseType(dtype=SupportedDataTypes.DATE),
                 nullable=False,
                 primary_key=False,
                 description="Approval period END date"
@@ -115,9 +115,9 @@ def _next_period_start_from_current(approvals: list[dict]) -> Optional[datetime]
     return datetime.fromisoformat(approvals[0]['period']['to']) + timedelta(days=1)
 
 
-def _timestamp_from_iso_str(iso_str: str) -> float:
+def _date_from_str(iso_str: str) -> str:
     dt = datetime.fromisoformat(iso_str)
-    return dt.timestamp()
+    return dt.isoformat()
 
 
 def _transform_periods_for_keboola(all_periods: list[dict], team_id: int) -> tuple[list[dict], list[dict]]:
@@ -133,8 +133,8 @@ def _transform_periods_for_keboola(all_periods: list[dict], team_id: int) -> tup
         appr_out = {
             _COL_ID: appr_id,
             _COL_TEAM_ID: team_id,
-            _COL_START: _timestamp_from_iso_str(period['period']['from']),
-            _COL_END: _timestamp_from_iso_str(period['period']['to']),
+            _COL_START: _date_from_str(period['period']['from']),
+            _COL_END: _date_from_str(period['period']['to']),
             _COL_STATUS: period['status'],
             _COL_USER: period['user']
         }

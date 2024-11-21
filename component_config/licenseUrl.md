@@ -1,1 +1,1 @@
-git@github.com:lkotyza-cen67271/kbc-tempo-extractor.git/blob/master/LICENSE.md
+https://github.com/lkotyza-cen67271/kbc-tempo-extractor/blob/master/LICENSE.md

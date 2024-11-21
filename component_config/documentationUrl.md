@@ -1,1 +1,1 @@
-git@github.com:lkotyza-cen67271/kbc-tempo-extractor.git/blob/master/README.md
+https://github.com/lkotyza-cen67271/kbc-tempo-extractor/blob/master/README.md

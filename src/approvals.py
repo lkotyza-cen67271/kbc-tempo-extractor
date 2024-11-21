@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import tempo
 import uuid
 from typing import Optional
+import time
 
 
 FILENAME_APPROVALS = "approvals.csv"
@@ -98,8 +99,18 @@ def run(since: datetime) -> tuple[list[dict], list[dict]]:
         while period_start_date < datetime.now():
             period = tempo.team_timesheet_approvals(team['id'], str(period_start_date.date()))
             if period is None:
-                logging.error("Period is None - skipping team")
-                logging.error(f"(team: {team['id']} - {team['name']}; period_start: {str(period_start_date.date())})")
+                logging.warning("Period is None - retry 5 times")
+                logging.warning(f"(team: {team['id']} - {team['name']}; period_start: {str(period_start_date.date())})")
+                # sometimes call fails for no apparent reason so retry if failed
+                for i in range(5):
+                    time.sleep(2)
+                    period = tempo.team_timesheet_approvals(team['id'], str(period_start_date.date()))
+                    if period is not None:
+                        break
+                    logging.warning(f"team:{team['id']} Retry number {i+1} / 5")
+                    if i == 4:
+                        logging.error(f"Retrying approvals failed. Skipping team {team['id']}...")
+            if period is None:
                 break
             raw_out.extend(period)
             next_period_start_date = _next_period_start_from_current(period)

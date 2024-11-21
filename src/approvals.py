@@ -98,8 +98,8 @@ def run(since: datetime) -> tuple[list[dict], list[dict]]:
         while period_start_date < datetime.now():
             period = tempo.team_timesheet_approvals(team['id'], str(period_start_date.date()))
             if period is None:
-                logging.debug("period is None")
-                return ([], [])
+                logging.error(f"Period is None - skipping team (team: {team['id']} - {team['name']}; period_start: {str(period_start_date.date())})")
+                break
             raw_out.extend(period)
             next_period_start_date = _next_period_start_from_current(period)
             if next_period_start_date is None:

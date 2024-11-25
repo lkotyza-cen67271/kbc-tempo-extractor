@@ -2,7 +2,7 @@
 from keboola.component.dao import BaseType, ColumnDefinition, SupportedDataTypes, logging
 from datetime import datetime, timedelta
 import tempo
-import uuid
+import hashlib
 from typing import Optional
 import time
 
@@ -135,16 +135,24 @@ def _date_from_str(iso_str: str) -> str:
     return dt.isoformat()
 
 
+def _calculate_approval_id(team_id, period_dates: dict) -> str:
+    id_source = f"{team_id};{period_dates['from']};{period_dates['to']}"
+    hashed_id = hashlib.sha256()
+    hashed_id.update(bytes(id_source, "utf-8"))
+    return hashed_id.hexdigest()
+
+
 def _transform_periods_for_keboola(all_periods: list[dict], team_id: int) -> tuple[list[dict], list[dict]]:
     """
         Data for keboola needs to be transformed to flat structure coresponding to the table scheme
 
         returns (approval_list, worklog_list)
     """
+
     appr_output = []
     wl_output = []
     for period in all_periods:
-        appr_id = uuid.uuid4()
+        appr_id = _calculate_approval_id(team_id, period['period'])
         appr_out = {
             _COL_ID: appr_id,
             _COL_TEAM_ID: team_id,

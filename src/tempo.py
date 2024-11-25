@@ -148,7 +148,8 @@ def team_timesheet_approvals(team_id: int, date_from: str, load_worklogs: bool =
     resp = _raw_get(f"/timesheet-approvals/team/{team_id}", params=req)
     if resp.status_code < 200 or resp.status_code >= 300:
         logging.error(f"tempo.team_timesheet_approvals resp is None or status is {resp.status_code}")
-        logging.error(f"tempo-request-id: {resp.headers['Tempo-Request-Id']} body: {resp.text}")
+        headers = [f"{k}:{v}" for k, v in resp.headers.items()]
+        logging.error(f"headers: {' ; '.join(headers)} body: {resp.text}")
         return
     data = resp.json()
     counter = 0

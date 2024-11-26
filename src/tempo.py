@@ -138,6 +138,7 @@ def team_timesheet_approvals(team_id: int, date_from: str, load_worklogs: bool =
         period: {from: str, to: str},
         status: str,
         user: str (account_id),
+        reviewer: str (account_id),
         worklogs: [jira_id, jira_id, ...]
     }
     """
@@ -160,6 +161,7 @@ def team_timesheet_approvals(team_id: int, date_from: str, load_worklogs: bool =
             "period": approval['period'],
             "status": approval['status']['key'],
             "user": approval['user']['accountId'],
+            "reviewer": approval['reviewer']['accountId'],
             "worklogs": []
         }
         if load_worklogs:

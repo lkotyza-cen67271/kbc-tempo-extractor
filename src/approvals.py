@@ -142,8 +142,8 @@ def _date_from_str(iso_str: str) -> str:
     return dt.isoformat()
 
 
-def _calculate_approval_id(team_id, period_dates: dict) -> str:
-    id_source = f"{team_id};{period_dates['from']};{period_dates['to']}"
+def _calculate_approval_id(team_id, user, period_dates: dict) -> str:
+    id_source = f"{team_id};{period_dates['from']};{period_dates['to']};{user}"
     hashed_id = hashlib.sha256()
     hashed_id.update(bytes(id_source, "utf-8"))
     return hashed_id.hexdigest()
@@ -159,7 +159,7 @@ def _transform_periods_for_keboola(all_periods: list[dict], team_id: int) -> tup
     appr_output = []
     wl_output = []
     for period in all_periods:
-        appr_id = _calculate_approval_id(team_id, period['period'])
+        appr_id = _calculate_approval_id(team_id, period['user'], period['period'])
         appr_out = {
             _COL_ID: appr_id,
             _COL_TEAM_ID: team_id,

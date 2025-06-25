@@ -7,7 +7,6 @@ from typing import Any
 
 FILENAME_WORKLOG = "worklogs.csv"
 
-_TABLE_WORKLOG = "worklogs"
 _COL_ID = "tempo_id"
 _COL_ISSUE_ID = "issue_id"
 _COL_AUTHOR_ACCOUNT_ID = "author_account_id"
@@ -17,52 +16,50 @@ _COL_CREATED = "created"
 _COL_UPDATED = "updated"
 
 
-def table_column_definitions() -> dict[str, dict[str, ColumnDefinition]]:
+def column_definitions() -> dict[str, Any]:
     return {
-        _TABLE_WORKLOG: {
-            _COL_ID: ColumnDefinition(
-                data_types=BaseType(dtype=SupportedDataTypes.INTEGER),
-                nullable=False,
-                primary_key=True,
-                description="ID of worklog in Tempo system"
-            ),
-            _COL_ISSUE_ID: ColumnDefinition(
-                data_types=BaseType(dtype=SupportedDataTypes.INTEGER),
-                nullable=False,
-                primary_key=False,
-                description="issue ID"
-            ),
-            _COL_AUTHOR_ACCOUNT_ID: ColumnDefinition(
-                data_types=BaseType(dtype=SupportedDataTypes.STRING, length=300),
-                nullable=False,
-                primary_key=False,
-                description="author of the worklog"
-            ),
-            _COL_START_DATE_TIME_UTC: ColumnDefinition(
-                data_types=BaseType(dtype=SupportedDataTypes.DATE),
-                nullable=False,
-                primary_key=False,
-                description="start date of the worklog"
-            ),
-            _COL_TIME_SPENT_SECONDS: ColumnDefinition(
-                data_types=BaseType(dtype=SupportedDataTypes.INTEGER, length="100"),
-                nullable=False,
-                primary_key=False,
-                description="time spent"
-            ),
-            _COL_CREATED: ColumnDefinition(
-                data_types=BaseType(dtype=SupportedDataTypes.DATE),
-                nullable=False,
-                primary_key=False,
-                description="worklog created date"
-            ),
-            _COL_UPDATED: ColumnDefinition(
-                data_types=BaseType(dtype=SupportedDataTypes.DATE),
-                nullable=False,
-                primary_key=False,
-                description="worklog last updated date"
-            ),
-        }
+        _COL_ID: ColumnDefinition(
+            data_types=BaseType(dtype=SupportedDataTypes.INTEGER),
+            nullable=False,
+            primary_key=True,
+            description="ID of worklog in Tempo system"
+        ),
+        _COL_ISSUE_ID: ColumnDefinition(
+            data_types=BaseType(dtype=SupportedDataTypes.INTEGER),
+            nullable=False,
+            primary_key=False,
+            description="issue ID"
+        ),
+        _COL_AUTHOR_ACCOUNT_ID: ColumnDefinition(
+            data_types=BaseType(dtype=SupportedDataTypes.STRING, length=300),
+            nullable=False,
+            primary_key=False,
+            description="author of the worklog"
+        ),
+        _COL_START_DATE_TIME_UTC: ColumnDefinition(
+            data_types=BaseType(dtype=SupportedDataTypes.DATE),
+            nullable=False,
+            primary_key=False,
+            description="start date of the worklog"
+        ),
+        _COL_TIME_SPENT_SECONDS: ColumnDefinition(
+            data_types=BaseType(dtype=SupportedDataTypes.INTEGER, length="100"),
+            nullable=False,
+            primary_key=False,
+            description="time spent"
+        ),
+        _COL_CREATED: ColumnDefinition(
+            data_types=BaseType(dtype=SupportedDataTypes.DATE),
+            nullable=False,
+            primary_key=False,
+            description="worklog created date"
+        ),
+        _COL_UPDATED: ColumnDefinition(
+            data_types=BaseType(dtype=SupportedDataTypes.DATE),
+            nullable=False,
+            primary_key=False,
+            description="worklog last updated date"
+        ),
     }
 
 

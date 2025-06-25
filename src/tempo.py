@@ -1,11 +1,13 @@
 from keboola.component.dao import logging
 from requests import Session, Response
 import json
-from typing import Optional
+import time
+from typing import Optional, Callable
 
 
 _base_url = "https://api.eu.tempo.io/4"
 _s = Session()
+_MAX_ITER_COUNT = 5
 
 
 def init(token):
@@ -201,6 +203,47 @@ def _worklogs_from_approval(approval: dict) -> Optional[list[dict]]:
         results.extend(data['results'])
         next = _parse_next(data['metadata'])
     return results
+
+
+def worklogs_updated_from(since: str, modify_result: Callable = None) -> Optional[list[dict]]:
+    """
+    since: string <yyyy-MM-dd['T'HH:mm:ss]['Z']>
+    """
+    result = []
+    req = {
+        "updatedFrom": since,
+        "limit": 5000
+    }
+    resp = _raw_get("/worklogs", params=req)
+    if resp is None or (resp.status_code < 200 or resp.status_code >= 300):
+        logging.error(f"[worklogs] is None or status is {resp.status_code}")
+        return
+    data = resp.json()
+    for item in data['results']:
+        modified_item = item
+        if modify_result is not None:
+            modified_item = modify_result(item)
+        result.append(modified_item)
+    next = _parse_next(data['metadata'])
+    iter_c = 0
+    while next is not None and iter_c < _MAX_ITER_COUNT:
+        iter_c += 1
+        resp = _raw_get(next, params=req)
+        if resp is None or (resp.status_code < 200 or resp.status_code >= 300):
+            logging.error(f"[worklogs]next[{next}] is None or status is {resp.status_code}")
+            time.sleep(1)
+            continue
+        data = resp.json()
+        for item in data['results']:
+            modified_item = item
+            if modify_result is not None:
+                modified_item = modify_result(item)
+            result.append(modified_item)
+        next = _parse_next(data['metadata'])
+        iter_c = 0
+    if iter_c != 0:
+        logging.error(f"[worklogs] failed to get all worklogs;iter_c={iter_c}")
+    return result
 
 
 def worklog_author(worklog_id: int) -> Optional[str]:

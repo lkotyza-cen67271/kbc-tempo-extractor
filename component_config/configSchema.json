@@ -57,13 +57,15 @@
 					"enum_titles": [
 						"Worklog Authors",
 						"Approvals",
-						"Teams and Membership"
+						"Teams and Membership",
+						"Worklogs"
 					]
 				},
 				"enum": [
 					"worklog_authors",
 					"approvals",
-					"teams"
+					"teams",
+					"worklogs"
 				],
 				"type": "string"
 			},

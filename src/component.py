@@ -5,6 +5,7 @@ from keboola.component.dao import TableDefinition
 import approvals
 import team_membership
 import worklog_author
+import worklogs
 import tempo
 import jirac as jc
 import dateparser as dp
@@ -57,6 +58,20 @@ class Component(ComponentBase):
                 self.write_out_data(table, list(coldef.keys()), data)
             else:
                 logging.warning("no worklog_author")
+
+        # worklogs
+        if "worklogs" in params.datasets:
+            data = worklogs.run(since_date)
+            if data is not None and len(data) > 0:
+                coldef = worklogs.column_definitions()
+                table = self.create_out_table_definition(
+                    worklogs.FILENAME,
+                    incremental=params.incremental,
+                    schema=coldef
+                )
+                self.write_out_data(table, list(coldef.keys()), data)
+            else:
+                logging.warning("no worklogs")
 
         # Approvals
         if "approvals" in params.datasets:

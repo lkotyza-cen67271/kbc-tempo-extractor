@@ -1,10 +1,8 @@
 #!/usr/bin/env python3.10
 from keboola.component.dao import BaseType, ColumnDefinition, SupportedDataTypes, logging
-from datetime import datetime, timedelta
+from datetime import datetime
 import tempo
-import hashlib
-from typing import Optional, Any
-import time
+from typing import Any
 
 
 FILENAME_WORKLOG = "worklogs.csv"
@@ -82,5 +80,7 @@ def run(since: datetime) -> list[dict[str, Any]]:
             _COL_CREATED: original_wl['createdAt'],
             _COL_UPDATED: original_wl['updatedAt']
         }
+    logging.info("Started to download worklogs")
     data = tempo.worklogs_updated_from(str(since.date()), map_worklog_to_table)
+    logging.info("Download finished successfully")
     return data

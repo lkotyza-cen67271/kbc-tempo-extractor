@@ -5,7 +5,7 @@ import tempo
 from typing import Any
 
 
-FILENAME_WORKLOG = "worklogs.csv"
+FILENAME = "worklogs.csv"
 
 _COL_ID = "tempo_id"
 _COL_ISSUE_ID = "issue_id"

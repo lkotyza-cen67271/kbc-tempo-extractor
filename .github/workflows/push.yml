@@ -40,9 +40,12 @@ jobs:
             echo "branch_name=$branch_name" | tee -a $GITHUB_OUTPUT
           else
             raw=$(git branch -r --contains ${{ github.ref }})
-            echo $raw
             branch="$(echo ${raw//origin\//} | tr -d '\n')"
-            echo "branch_name=$branch" | tee -a $GITHUB_OUTPUT
+            if [[ $branch =~ "master" ]]; then
+                echo "branch_name=master" | tee -a $GITHUB_OUTPUT
+            else
+                echo "branch_name=$branch" | tee -a $GITHUB_OUTPUT
+            fi
           fi
 
       - name: Is current branch the default branch

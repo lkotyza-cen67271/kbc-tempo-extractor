@@ -3,6 +3,7 @@ from requests import Session, Response
 import json
 import time
 from typing import Optional, Callable
+from datetime import datetime
 
 
 _base_url = "https://api.eu.tempo.io/4"
@@ -205,7 +206,7 @@ def _worklogs_from_approval(approval: dict) -> Optional[list[dict]]:
     return results
 
 
-def worklogs_updated_from(since: str, modify_result: Callable = None) -> Optional[list[dict]]:
+def worklogs_updated_from(since: datetime, modify_result: Callable = None) -> Optional[list[dict]]:
     """
     since: string <yyyy-MM-dd['T'HH:mm:ss]['Z']>
     """
@@ -235,6 +236,9 @@ def worklogs_updated_from(since: str, modify_result: Callable = None) -> Optiona
             continue
         data = resp.json()
         for item in data['results']:
+            start_date = datetime.fromisoformat(item["startDate"])
+            if start_date.timestamp() > datetime(since.year, since.month+2, since.day):
+                return result
             modified_item = item
             if modify_result is not None:
                 modified_item = modify_result(item)

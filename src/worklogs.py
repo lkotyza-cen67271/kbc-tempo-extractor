@@ -68,12 +68,17 @@ def run(since: datetime) -> list[dict[str, Any]]:
     since: datetime
     """
     def map_worklog_to_table(original_wl: dict) -> dict:
+        startDTUTC = ""
+        if "startDateTimeUtc" in original_wl.keys():
+            startDTUTC = original_wl['startDateTimeUtc']
+        else:
+            startDTUTC = f"{original_wl['startDate']}T{original_wl['startTime']}.000Z"
         return {
             _COL_ID: original_wl['tempoWorklogId'],
             _COL_ISSUE_ID: original_wl['issue']['id'],
             _COL_AUTHOR_ACCOUNT_ID: original_wl['author']['accountId'],
             _COL_TIME_SPENT_SECONDS: original_wl['timeSpentSeconds'],
-            _COL_START_DATE_TIME_UTC: original_wl['startDateTimeUtc'],
+            _COL_START_DATE_TIME_UTC: startDTUTC,
             _COL_CREATED: original_wl['createdAt'],
             _COL_UPDATED: original_wl['updatedAt']
         }

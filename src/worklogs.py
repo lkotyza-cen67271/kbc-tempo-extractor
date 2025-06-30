@@ -83,6 +83,6 @@ def run(since: datetime) -> list[dict[str, Any]]:
             _COL_UPDATED: original_wl['updatedAt']
         }
     logging.info("Started to download worklogs")
-    data = tempo.worklogs_updated_from(str(since.date()), map_worklog_to_table)
+    data = tempo.worklogs_updated_from(since, map_worklog_to_table)
     logging.info("Download finished successfully")
     return data

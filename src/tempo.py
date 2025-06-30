@@ -237,7 +237,7 @@ def worklogs_updated_from(since: datetime, modify_result: Callable = None) -> Op
         data = resp.json()
         for item in data['results']:
             start_date = datetime.fromisoformat(item["startDate"])
-            if start_date.timestamp() > datetime(since.year, since.month+2, since.day):
+            if start_date.timestamp() > datetime(since.year, since.month+6, since.day):
                 return result
             modified_item = item
             if modify_result is not None:

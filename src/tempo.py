@@ -173,10 +173,7 @@ def team_timesheet_approvals(team_id: int, date_from: str, load_worklogs: bool =
                 continue
             for worklog in worklogs:
                 tempo_worklog_ids.append(worklog['tempoWorklogId'])
-            map_ttj = tempo_to_jira_worklog_ids(tempo_worklog_ids)
-            if map_ttj is None:
-                continue
-            out['worklogs'] = list(map_ttj.values())
+            out['worklogs'] = tempo_worklog_ids
         results.append(out)
     return results
 

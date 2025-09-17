@@ -9,6 +9,9 @@ import time
 
 FILENAME_APPROVALS = "approvals.csv"
 FILENAME_APPROVAL_WORKLOGS = "approval_worklogs.csv"
+LOAD_JIRA_WORKLOGS = True
+LOAD_TEMPO_WORKLOGS = False
+
 
 _TABLE_APPROVALS = "approvals"
 _TABLE_APPROVAL_WORKLOGS = "approval_worklogs"
@@ -85,9 +88,10 @@ def table_column_definitions() -> dict[str, dict[str, ColumnDefinition]]:
         }}
 
 
-def run(since: datetime) -> tuple[list[dict], list[dict]]:
+def run(since: datetime, data_source: bool) -> tuple[list[dict], list[dict]]:
     """
     since: datetime
+    data_source: bool - LOAD_JIRA_WORKLOGS | LOAD_TEMPO_WORKLOGS
 
     returns tupple(approvals, approval_worklogs)
     """
@@ -104,14 +108,14 @@ def run(since: datetime) -> tuple[list[dict], list[dict]]:
         raw_out: list[dict] = []
         period_start_date = since
         while period_start_date < datetime.now():
-            period = tempo.team_timesheet_approvals(team['id'], str(period_start_date.date()))
+            period = tempo.team_timesheet_approvals(team['id'], str(period_start_date.date()), return_jira_worklogs=data_source)
             if period is None:
                 logging.warning("Period is None - retry 5 times")
                 logging.warning(f"(team: {team['id']} - {team['name']}; period_start: {str(period_start_date.date())})")
                 # sometimes call fails for no apparent reason so retry if failed
                 for i in range(5):
                     time.sleep(2)
-                    period = tempo.team_timesheet_approvals(team['id'], str(period_start_date.date()))
+                    period = tempo.team_timesheet_approvals(team['id'], str(period_start_date.date()), return_jira_worklogs=data_source)
                     if period is not None:
                         break
                     logging.warning(f"team:{team['id']} Retry number {i+1} / 5")

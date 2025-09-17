@@ -45,6 +45,7 @@ class Component(ComponentBase):
         since_date = self._parse_since_to_datetime(params.since)
 
         # worklog authors
+        # deprecated - should not be used
         if "worklog_authors" in params.datasets:
             since_mls = int(since_date.timestamp()) * 1_000
             data = worklog_author.run(since_mls)
@@ -73,10 +74,38 @@ class Component(ComponentBase):
             else:
                 logging.warning("no worklogs")
 
-        # Approvals
-        if "approvals" in params.datasets:
+        # Approvals (Jira)
+        if "approvals_jira" in params.datasets:
             logging.debug("approvals")
-            approvals_data, appr_worklogs_data = approvals.run(since_date)
+            approvals_data, appr_worklogs_data = approvals.run(since_date, approvals.LOAD_JIRA_WORKLOGS)
+            coldefs = approvals.table_column_definitions()
+            if approvals_data is not None and len(approvals_data) > 0:
+                table = self.create_out_table_definition(
+                    approvals.FILENAME_APPROVALS,
+                    incremental=params.incremental,
+                    schema=coldefs[approvals._TABLE_APPROVALS]
+                )
+                self.write_out_data(table, list(coldefs[approvals._TABLE_APPROVALS].keys()), approvals_data)
+            else:
+                logging.warning("no approvals")
+            if appr_worklogs_data is not None and len(appr_worklogs_data) > 0:
+                table = self.create_out_table_definition(
+                    approvals.FILENAME_APPROVAL_WORKLOGS,
+                    incremental=params.incremental,
+                    schema=coldefs[approvals._TABLE_APPROVAL_WORKLOGS]
+                )
+                self.write_out_data(
+                    table,
+                    list(coldefs[approvals._TABLE_APPROVAL_WORKLOGS].keys()),
+                    appr_worklogs_data
+                )
+            else:
+                logging.warning("no appr_worklogs_data")
+
+        # Approvals (Tempo)
+        if "approvals_tempo" in params.datasets:
+            logging.debug("approvals tempo")
+            approvals_data, appr_worklogs_data = approvals.run(since_date, approvals.LOAD_TEMPO_WORKLOGS)
             coldefs = approvals.table_column_definitions()
             if approvals_data is not None and len(approvals_data) > 0:
                 table = self.create_out_table_definition(

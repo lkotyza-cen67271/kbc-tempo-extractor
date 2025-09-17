@@ -128,13 +128,14 @@ def teams() -> Optional[list[dict]]:
     return teams
 
 
-def team_timesheet_approvals(team_id: int, date_from: str, load_worklogs: bool = True) -> Optional[list[dict]]:
+def team_timesheet_approvals(team_id: int, date_from: str, load_worklogs: bool = True, return_jira_worklogs: bool = False) -> Optional[list[dict]]:
     """
     timesheet approvals for specific team in Tempo Period
 
     team_id: int - id of the team
     date_from: str - date format yyyy-mm-dd
     load_worklogs: load worklogs for approvals
+    return_jira_worklogs: bool - default behavior returns tempoWorklogId if you want to get jiraWorklogId set this to True
 
     returns {
         period: {from: str, to: str},
@@ -173,7 +174,13 @@ def team_timesheet_approvals(team_id: int, date_from: str, load_worklogs: bool =
                 continue
             for worklog in worklogs:
                 tempo_worklog_ids.append(worklog['tempoWorklogId'])
-            out['worklogs'] = tempo_worklog_ids
+            if return_jira_worklogs:
+                map_ttj = tempo_worklog_ids(tempo_worklog_ids)
+                if map_ttj is None:
+                    continue
+                out['worklogs'] = list(map_ttj.values())
+            else:
+                out['worklogs'] = tempo_worklog_ids
         results.append(out)
     return results
 

@@ -1,1 +1,1 @@
-https://github.com/lkotyza-cen67271/kbc-tempo-extractor.git
+https://github.com/lkotyza-cen67271/kbc-tempo-extractor

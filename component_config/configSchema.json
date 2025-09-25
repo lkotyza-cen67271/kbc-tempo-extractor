@@ -50,7 +50,7 @@
 			"type": "array",
 			"format": "select",
 			"title": "Datasets:",
-			"description": "",
+			"description": "to load \"Worklog Attributes\", you must first load \"Worklogs\"",
 			"uniqueItems": true,
 			"items": {
 				"options": {
@@ -59,7 +59,8 @@
 						"Approvals (JIRA)",
 						"Approvals (TEMPO)",
 						"Teams and Membership",
-						"Worklogs"
+						"Worklogs",
+						"Worklog Attributes"
 					]
 				},
 				"enum": [
@@ -67,7 +68,8 @@
 					"approvals_jira",
 					"approvals_tempo",
 					"teams",
-					"worklogs"
+					"worklogs",
+					"worklog_attributes"
 				],
 				"type": "string"
 			},

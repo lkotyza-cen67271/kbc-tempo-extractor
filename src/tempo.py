@@ -120,12 +120,86 @@ def teams() -> Optional[list[dict]]:
     while next is not None:
         resp = _raw_get(next, params=req)
         if resp.status_code < 200 or resp.status_code >= 300:
-            # log.error("tempo.teams", "resp is None or status is not 2xx")
+            #log.error("tempo.teams", "resp is None or status is not 2xx")
             continue
         data = resp.json()
         teams.extend(data['results'])
         next = _parse_next(data['metadata'])
     return teams
+
+
+def attribute_config():
+    """
+    returns {
+        key: str,
+        name: str,
+        type: str,
+        values: str(json)
+    }
+    """
+    def transform_data(data):
+        transformed_output = []
+        for item in data['results']:
+            transformed_output.append({
+                "key": data['key'],
+                "name": data['name'],
+                "type": data['type'],
+                "values": json.dumps(data['values'])
+            })
+        return transformed_output
+    result = []
+    resp = _raw_get("/work-attributes")
+    if resp is None or (resp.status_code < 200 or resp.status_code >= 300):
+        logging.error(f"[tempo.attribute_config] resp is None or status is {resp.status_code}")
+        return
+    data = resp.json()
+    result.append(transform_data(data))
+    next = _parse_next(data['metadata'])
+    while next is not None:
+        resp = _raw_get(next)
+        if resp.status_code < 200 or resp.status_code >= 300:
+            logging.error(f"[tempo.attribute_config] resp is None or status is {resp.status_code}")
+            continue
+        data = resp.json()
+        result.append(transform_data(data))
+        next = _parse_next(data['metadata'])
+    return teams
+    pass
+
+
+def worklog_attributes(worklogs: list) -> Optional[list[dict]]:
+    """
+    loads attributes for specified worklogs
+
+    worklogs: list(max length 500) - list of worklogs to load attributes for
+
+    returns {
+            tempo_worklog_id: int,
+            attribute_key: str
+            attribute_value: str
+    }
+    """
+    if len(worklogs) > 500:
+        logging.error("[tempo.worklog_attributes] reached limit of worklogs (500)")
+        return
+    req = {
+        "tempoWorklogIds": worklogs
+    }
+    resp = _raw_post("/worklogs/work-attribute-values/search", req)
+    if resp is None or (resp.status_code < 200 or resp.status_code >= 300):
+        logging.error(f"[tempo.worklog_attributes] resp is None or status is {resp.status_code}")
+        return
+    data = resp.json()
+    result = []
+    for wl_attrs in data:
+        worklog_id = wl_attrs['tempoWorklogId']
+        for attribute in wl_attrs['workAttributeValues']:
+            result.append({
+                "tempo_worklog_id": worklog_id,
+                "attribute_key": attribute['key'],
+                "attribute_value": attribute['value']
+            })
+    return result
 
 
 def team_timesheet_approvals(team_id: int,
@@ -145,7 +219,7 @@ def team_timesheet_approvals(team_id: int,
         status: str,
         user: str (account_id),
         reviewer: Optional[str] (account_id),
-        worklogs: [jira_id, jira_id, ...]
+        worklogs: [worklog_id, worklog_id, ...]
     }
     """
     results: list[dict] = []

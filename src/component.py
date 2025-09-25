@@ -60,9 +60,11 @@ class Component(ComponentBase):
             else:
                 logging.warning("no worklog_author")
 
-        # worklogs
+        # Worklogs
+        worklogs_data = []
         if "worklogs" in params.datasets:
             data = worklogs.run(since_date)
+            worklogs_data = data
             if data is not None and len(data) > 0:
                 coldef = worklogs.column_definitions()
                 table = self.create_out_table_definition(
@@ -73,6 +75,20 @@ class Component(ComponentBase):
                 self.write_out_data(table, list(coldef.keys()), data)
             else:
                 logging.warning("no worklogs")
+
+        # Worklog attributes
+        if "worklogs" in params.datasets and "worklog_attributes" in params.datasets:
+            data = wl_attributes.run(worklogs_data)
+            if data is not None and len(data) > 0:
+                coldef = worklogs.column_definitions()
+                table = self.create_out_table_definition(
+                    worklogs.FILENAME,
+                    incremental=params.incremental,
+                    schema=coldef
+                )
+                self.write_out_data(table, list(coldef.keys()), data)
+            else:
+                logging.warning("no worklog attributes")
 
         # Approvals (Jira)
         if "approvals_jira" in params.datasets:

@@ -120,7 +120,7 @@ def teams() -> Optional[list[dict]]:
     while next is not None:
         resp = _raw_get(next, params=req)
         if resp.status_code < 200 or resp.status_code >= 300:
-            #log.error("tempo.teams", "resp is None or status is not 2xx")
+            # log.error("tempo.teams", "resp is None or status is not 2xx")
             continue
         data = resp.json()
         teams.extend(data['results'])

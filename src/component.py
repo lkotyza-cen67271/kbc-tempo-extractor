@@ -5,6 +5,7 @@ from keboola.component.dao import TableDefinition
 import approvals
 import team_membership
 import worklog_author
+import wl_attributes
 import worklogs
 import tempo
 import jirac as jc

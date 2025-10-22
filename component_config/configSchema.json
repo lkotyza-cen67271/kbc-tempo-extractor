@@ -50,7 +50,7 @@
 			"type": "array",
 			"format": "select",
 			"title": "Datasets:",
-			"description": "to load \"Worklog Attributes\", you must first load \"Worklogs\"",
+			"description": "to load \"Worklog Attributes\", you must have \"Worklogs\" dataset selected",
 			"uniqueItems": true,
 			"items": {
 				"options": {

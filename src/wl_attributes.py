@@ -81,6 +81,7 @@ def run(worklogs: list) -> list[dict[str, Any]]:
             _TABLE_WL_ATTR: [],
             _TABLE_WL_ATTR_CONFIG: []
         }
+    logging.info(f"Started loading worklog attributes for {len(worklogs)} number of worklogs")
     buffer_size = 400
     buffer_start = 0
     attribute_data = []
@@ -90,6 +91,7 @@ def run(worklogs: list) -> list[dict[str, Any]]:
         attributes = tempo.worklog_attributes(buffered_worklogs)
         if attributes is not None:
             attribute_data.append(attributes)
+    logging.info("Finished loading worklog attributes")
     return {
         _TABLE_WL_ATTR: attribute_data
     }

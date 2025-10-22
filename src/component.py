@@ -79,6 +79,7 @@ class Component(ComponentBase):
 
         # Worklog attributes
         if "worklogs" in params.datasets and "worklog_attributes" in params.datasets:
+            logging.info(f"loaded {len(worklogs_data)} number of worklogs")
             data = wl_attributes.run(worklogs_data)
             if data is not None and len(data) > 0:
                 coldef = worklogs.column_definitions()

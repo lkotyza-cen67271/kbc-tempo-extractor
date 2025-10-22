@@ -66,6 +66,7 @@ class Component(ComponentBase):
         if "worklogs" in params.datasets:
             data = worklogs.run(since_date)
             worklogs_data = data
+            logging.info("updated worklogs_data")
             if data is not None and len(data) > 0:
                 coldef = worklogs.column_definitions()
                 table = self.create_out_table_definition(
@@ -76,6 +77,7 @@ class Component(ComponentBase):
                 self.write_out_data(table, list(coldef.keys()), data)
             else:
                 logging.warning("no worklogs")
+            logging.info("worklogs are fully loaded")
 
         # Worklog attributes
         if "worklogs" in params.datasets and "worklog_attributes" in params.datasets:

@@ -2,7 +2,7 @@ from keboola.component.dao import logging
 from requests import Session, Response
 import json
 import time
-from typing import Optional, Callable
+from typing import Optional, Callable, Any
 
 
 _base_url = "https://api.eu.tempo.io/4"
@@ -128,23 +128,23 @@ def teams() -> Optional[list[dict]]:
     return teams
 
 
-def attribute_config():
+def attribute_config() -> Optional[list[dict[str, Any]]]:
     """
     returns {
-        key: str,
-        name: str,
-        type: str,
-        values: str(json)
+        attribute_key: str,
+        attribute_name: str,
+        attribute_type: str,
+        attribute_values: str(json)
     }
     """
     def transform_data(data):
         transformed_output = []
         for item in data['results']:
             transformed_output.append({
-                "key": data['key'],
-                "name": data['name'],
-                "type": data['type'],
-                "values": json.dumps(data['values'])
+                "attribute_key": data['key'],
+                "attribute_name": data['name'],
+                "attribute_type": data['type'],
+                "attribute_values": json.dumps(data['values'])
             })
         return transformed_output
     result = []
@@ -164,7 +164,6 @@ def attribute_config():
         result.append(transform_data(data))
         next = _parse_next(data['metadata'])
     return teams
-    pass
 
 
 def worklog_attributes(worklogs: list) -> Optional[list[dict]]:

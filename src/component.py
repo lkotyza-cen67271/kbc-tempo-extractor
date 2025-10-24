@@ -82,18 +82,40 @@ class Component(ComponentBase):
 
         # Worklog attributes
         if "worklogs" in params.datasets and "worklog_attributes" in params.datasets:
-            logging.info(f"loaded {len(worklogs_data)} number of worklogs")
+            logging.info("worklog attributes")
             data = wl_attributes.run(worklogs_data)
-            if data is not None and len(data) > 0:
-                coldef = worklogs.column_definitions()
+            coldefs = wl_attributes.column_definitions()
+            # attribute data
+            attributes = data[wl_attributes._TABLE_WL_ATTR]
+            if attributes is not None and len(attributes) > 0:
                 table = self.create_out_table_definition(
-                    worklogs.FILENAME,
+                    wl_attributes.FILENAME_WL_ATTR,
                     incremental=params.incremental,
-                    schema=coldef
+                    schema=coldefs[wl_attributes._TABLE_WL_ATTR]
                 )
-                self.write_out_data(table, list(coldef.keys()), data)
+                self.write_out_data(
+                        table=table,
+                        fieldnames=list(coldefs[wl_attributes._TABLE_WL_ATTR].keys()),
+                        data=attributes
+                )
             else:
                 logging.warning("no worklog attributes")
+            # attribute configs
+            configs = data[wl_attributes._TABLE_WL_ATTR_CONFIG]
+            if configs is not None and len(attributes) > 0:
+                table = self.create_out_table_definition(
+                    wl_attributes.FILENAME_WL_ATTR_CONFIG,
+                    incremental=params.incremental,
+                    schema=coldefs[wl_attributes._TABLE_WL_ATTR_CONFIG]
+                )
+                self.write_out_data(
+                        table=table,
+                        fieldnames=list(coldefs[wl_attributes._TABLE_WL_ATTR_CONFIG].keys()),
+                        data=configs
+                )
+            else:
+                logging.warning("no attribute configs")
+
 
         # Approvals (Jira)
         if "approvals_jira" in params.datasets:

@@ -140,12 +140,11 @@ def attribute_config() -> Optional[list[dict[str, Any]]]:
     def transform_data(data):
         transformed_output = []
         for item in data['results']:
-            logging.info(item)
             transformed_output.append({
-                "attribute_key": data['key'],
-                "attribute_name": data['name'],
-                "attribute_type": data['type'],
-                "attribute_values": json.dumps(data['values'])
+                "attribute_key": item['key'],
+                "attribute_name": item['name'],
+                "attribute_type": item['type'],
+                "attribute_values": json.dumps(item['values'])
             })
         return transformed_output
     result = []

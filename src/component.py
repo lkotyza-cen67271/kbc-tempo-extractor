@@ -65,6 +65,7 @@ class Component(ComponentBase):
         worklogs_data = []
         if "worklogs" in params.datasets:
             data = worklogs.run(since_date)
+            logging.info("finished running workogs.run")
             worklogs_data = data
             logging.info("updated worklogs_data")
             if data is not None and len(data) > 0:

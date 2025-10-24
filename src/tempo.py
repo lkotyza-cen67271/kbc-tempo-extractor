@@ -144,7 +144,7 @@ def attribute_config() -> Optional[list[dict[str, Any]]]:
                 "attribute_key": item['key'],
                 "attribute_name": item['name'],
                 "attribute_type": item['type'],
-                "attribute_values": json.dumps(item['values'])
+                "attribute_values": json.dumps(item['values']) if 'values' in item.keys() else ""
             })
         return transformed_output
     result = []

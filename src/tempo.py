@@ -153,7 +153,7 @@ def attribute_config() -> Optional[list[dict[str, Any]]]:
         logging.error(f"[tempo.attribute_config] resp is None or status is {resp.status_code}")
         return
     data = resp.json()
-    result.append(transform_data(data))
+    result.append(transform_data(data['results']))
     next = _parse_next(data['metadata'])
     while next is not None:
         resp = _raw_get(next)
@@ -161,7 +161,7 @@ def attribute_config() -> Optional[list[dict[str, Any]]]:
             logging.error(f"[tempo.attribute_config] resp is None or status is {resp.status_code}")
             continue
         data = resp.json()
-        result.append(transform_data(data))
+        result.append(transform_data(data['results']))
         next = _parse_next(data['metadata'])
     return teams
 

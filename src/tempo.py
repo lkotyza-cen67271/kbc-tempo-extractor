@@ -302,7 +302,6 @@ def worklogs_updated_from(since: str, modify_result: Callable = None) -> Optiona
     data = resp.json()
     for item in data['results']:
         modified_item = item
-        logging.info(item)
         if modify_result is not None:
             modified_item = modify_result(item)
         result.append(modified_item)

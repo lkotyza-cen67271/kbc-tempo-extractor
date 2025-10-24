@@ -65,9 +65,9 @@ class Component(ComponentBase):
         worklogs_data = []
         if "worklogs" in params.datasets:
             data = worklogs.run(since_date)
-            logging.info("finished running workogs.run")
+            logging.warning("finished running workogs.run")
             worklogs_data = data
-            logging.info("updated worklogs_data")
+            logging.warning("updated worklogs_data")
             if data is not None and len(data) > 0:
                 coldef = worklogs.column_definitions()
                 table = self.create_out_table_definition(

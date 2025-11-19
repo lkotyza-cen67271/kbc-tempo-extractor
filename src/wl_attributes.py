@@ -81,7 +81,7 @@ def run(worklogs: list) -> dict[str, [dict[str, Any]]]:
             _TABLE_WL_ATTR: [],
             _TABLE_WL_ATTR_CONFIG: []
         }
-    logging.info("Started to download worklog attributes")
+    logging.info(f"Started to download worklog attributes for {len(worklogs)} number of worklogs")
     # tempo can not load attributes for more than 500 worklogs at the same time
     buffer_size = 400
     buffer_start = 0
@@ -92,13 +92,13 @@ def run(worklogs: list) -> dict[str, [dict[str, Any]]]:
         attributes = tempo.worklog_attributes(buffered_worklogs)
         if attributes is not None:
             attribute_data.append(attributes)
-    logging.info(f"Finished loading worklog attributes [c:{len(attribute_data)}]")
+    logging.info(f"Finished loading worklog attributes [count:{len(attribute_data)}]")
     logging.info("Started to download attribute configs")
     config_data = []
     configs = tempo.attribute_config()
     if configs is not None:
         config_data = configs
-    logging.info(f"Finished loading attribute configs [c:{len(config_data)}]")
+    logging.info(f"Finished loading attribute configs [count:{len(config_data)}]")
     return {
         _TABLE_WL_ATTR: attribute_data,
         _TABLE_WL_ATTR_CONFIG: config_data

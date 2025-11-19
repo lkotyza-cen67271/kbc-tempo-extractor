@@ -84,6 +84,7 @@ class Component(ComponentBase):
             coldefs = wl_attributes.column_definitions()
             # attribute data
             attributes = data[wl_attributes._TABLE_WL_ATTR]
+            logging.info(attributes)
             if attributes is not None and len(attributes) > 0:
                 table = self.create_out_table_definition(
                     wl_attributes.FILENAME_WL_ATTR,
@@ -99,6 +100,7 @@ class Component(ComponentBase):
                 logging.warning("no worklog attributes")
             # attribute configs
             configs = data[wl_attributes._TABLE_WL_ATTR_CONFIG]
+            logging.info(configs)
             if configs is not None and len(attributes) > 0:
                 table = self.create_out_table_definition(
                     wl_attributes.FILENAME_WL_ATTR_CONFIG,

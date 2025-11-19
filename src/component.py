@@ -100,8 +100,7 @@ class Component(ComponentBase):
                 logging.warning("no worklog attributes")
             # attribute configs
             configs = data[wl_attributes._TABLE_WL_ATTR_CONFIG]
-            logging.info(configs)
-            if configs is not None and len(attributes) > 0:
+            if configs is not None and len(configs) > 0:
                 table = self.create_out_table_definition(
                     wl_attributes.FILENAME_WL_ATTR_CONFIG,
                     incremental=params.incremental,

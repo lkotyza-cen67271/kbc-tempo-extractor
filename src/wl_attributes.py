@@ -86,9 +86,10 @@ def run(worklogs: list) -> dict[str, [dict[str, Any]]]:
     buffer_size = 400
     buffer_start = 0
     attribute_data = []
-    while buffer_size > len(worklogs):
+    while buffer_start > len(worklogs):
+        logging.info(f"running buffer {buffer_start}:{buffer_start+buffer_size}")
         buffered_worklogs = worklogs[buffer_start:buffer_start+buffer_size]
-        buffer_start += buffer_size
+        buffer_start = buffer_start + buffer_size
         attributes = tempo.worklog_attributes(buffered_worklogs)
         if attributes is not None:
             attribute_data.append(attributes)

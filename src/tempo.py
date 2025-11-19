@@ -163,7 +163,7 @@ def attribute_config() -> Optional[list[dict[str, Any]]]:
         data = resp.json()
         result.append(transform_data(data))
         next = _parse_next(data['metadata'])
-    return teams
+    return result
 
 
 def worklog_attributes(worklogs: list) -> Optional[list[dict]]:

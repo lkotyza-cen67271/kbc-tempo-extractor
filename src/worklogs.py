@@ -1,4 +1,3 @@
-#!/usr/bin/env python3.10
 from keboola.component.dao import BaseType, ColumnDefinition, SupportedDataTypes, logging
 from datetime import datetime
 import tempo

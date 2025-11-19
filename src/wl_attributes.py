@@ -86,7 +86,7 @@ def run(worklogs: list) -> dict[str, [dict[str, Any]]]:
     buffer_size = 400
     buffer_start = 0
     attribute_data = []
-    while buffer_start > len(worklogs):
+    while buffer_start < len(worklogs):
         logging.info(f"running buffer {buffer_start}:{buffer_start+buffer_size}")
         buffered_worklogs = worklogs[buffer_start:buffer_start+buffer_size]
         buffer_start = buffer_start + buffer_size

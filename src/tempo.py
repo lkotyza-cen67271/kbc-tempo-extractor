@@ -1,6 +1,5 @@
 from keboola.component.dao import logging
 from requests import Session, Response
-from approvals import LOAD_JIRA_WORKLOGS
 import json
 import time
 from typing import Optional, Callable, Any
@@ -256,12 +255,12 @@ def team_timesheet_approvals(team_id: int,
                 continue
             for worklog in worklogs:
                 tempo_worklog_ids.append(worklog['tempoWorklogId'])
-            if worklog_source == LOAD_JIRA_WORKLOGS:
+            if worklog_source:  # Loads Jira
                 map_ttj = tempo_to_jira_worklog_ids(tempo_worklog_ids)
                 if map_ttj is None:
                     continue
                 out['worklogs'] = list(map_ttj.values())
-            else:
+            else:  # Loads Tempo
                 out['worklogs'] = tempo_worklog_ids
         results.append(out)
     return results

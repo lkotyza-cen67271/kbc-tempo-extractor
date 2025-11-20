@@ -95,7 +95,7 @@ def table_column_definitions() -> dict[str, dict[str, ColumnDefinition]]:
         }}
 
 
-def run(since: datetime, data_source: bool) -> tuple[list[dict], list[dict]]:
+def run(since: datetime, worklog_data_source: bool) -> tuple[list[dict], list[dict]]:
     """
     since: datetime
     data_source: bool - LOAD_JIRA_WORKLOGS | LOAD_TEMPO_WORKLOGS
@@ -118,16 +118,16 @@ def run(since: datetime, data_source: bool) -> tuple[list[dict], list[dict]]:
         while period_start_date < datetime.now():
             period = tempo.team_timesheet_approvals(team['id'],
                                                     str(period_start_date.date()),
-                                                    return_jira_worklogs=data_source)
+                                                    worklog_source=worklog_data_source)
             if period is None:
                 logging.warning("Period is None - retry 5 times")
                 logging.warning(f"(team: {team['id']} - {team['name']}; period_start: {str(period_start_date.date())})")
                 # sometimes call fails for no apparent reason so retry if failed
                 for i in range(5):
-                    time.sleep(2)
+                    time.sleep(10)
                     period = tempo.team_timesheet_approvals(team['id'],
                                                             str(period_start_date.date()),
-                                                            return_jira_worklogs=data_source)
+                                                            worklog_source=worklog_data_source)
                     if period is not None:
                         break
                     logging.warning(f"team:{team['id']} Retry number {i+1} / 5")

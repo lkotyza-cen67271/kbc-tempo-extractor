@@ -1,5 +1,6 @@
 from keboola.component.dao import logging
 from requests import Session, Response
+from approvals import LOAD_TEMPO_WORKLOGS, LOAD_JIRA_WORKLOGS
 import json
 import time
 from typing import Optional, Callable, Any
@@ -204,14 +205,14 @@ def worklog_attributes(worklogs: list) -> Optional[list[dict]]:
 def team_timesheet_approvals(team_id: int,
                              date_from: str,
                              load_worklogs: bool = True,
-                             return_jira_worklogs: bool = False) -> Optional[list[dict]]:
+                             worklog_source: bool = False) -> Optional[list[dict]]:
     """
     timesheet approvals for specific team in Tempo Period
 
     team_id: int - id of the team
     date_from: str - date format yyyy-mm-dd
     load_worklogs: load worklogs for approvals
-    return_jira_worklogs: bool - which worklog ids to load [TEMPO | JIRA]
+    worklog_source: bool - which worklog ids to load [TEMPO | JIRA]
 
     returns {
         period: {from: str, to: str},
@@ -255,7 +256,7 @@ def team_timesheet_approvals(team_id: int,
                 continue
             for worklog in worklogs:
                 tempo_worklog_ids.append(worklog['tempoWorklogId'])
-            if return_jira_worklogs:
+            if worklog_source == LOAD_JIRA_WORKLOGS:
                 map_ttj = tempo_to_jira_worklog_ids(tempo_worklog_ids)
                 if map_ttj is None:
                     continue

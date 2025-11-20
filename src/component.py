@@ -106,6 +106,7 @@ class Component(ComponentBase):
                     incremental=params.incremental,
                     schema=coldefs[wl_attributes._TABLE_WL_ATTR_CONFIG]
                 )
+                logging.info(f"[debug] - coldefs: {coldefs[wl_attributes._TABLE_WL_ATTR_CONFIG]}")
                 self.write_out_data(
                         table=table,
                         fieldnames=list(coldefs[wl_attributes._TABLE_WL_ATTR_CONFIG].keys()),

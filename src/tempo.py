@@ -91,7 +91,7 @@ def team_membership(team_id: int) -> Optional[list[dict]]:
     """
     resp = _raw_get(f"/team-memberships/team/{team_id}")
     if resp is None or (resp.status_code < 200 or resp.status_code >= 300):
-        # log.error("tempo.team_memberships", "resp is None or status is not 2xx")
+        logging.error("tempo.team_memberships", f"resp is None or status is {resp.status_code}")
         return
     data = resp.json()
     return data['results']
@@ -120,7 +120,7 @@ def teams() -> Optional[list[dict]]:
     while next is not None:
         resp = _raw_get(next, params=req)
         if resp.status_code < 200 or resp.status_code >= 300:
-            # log.error("tempo.teams", "resp is None or status is not 2xx")
+            logging.error("tempo.teams", f"resp is None or status is {resp.status_code}")
             continue
         data = resp.json()
         teams.extend(data['results'])

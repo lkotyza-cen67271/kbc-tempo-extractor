@@ -1,6 +1,6 @@
 from keboola.component.dao import logging
 from requests import Session, Response
-from approvals import LOAD_TEMPO_WORKLOGS, LOAD_JIRA_WORKLOGS
+from approvals import LOAD_JIRA_WORKLOGS
 import json
 import time
 from typing import Optional, Callable, Any

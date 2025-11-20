@@ -102,6 +102,7 @@ def run(since: datetime, data_source: bool) -> tuple[list[dict], list[dict]]:
 
     returns tupple(approvals, approval_worklogs)
     """
+    logging.info("Started to download timesheet approvals")
     # Load Team info
     all_teams = tempo.teams()
     if all_teams is None:
@@ -143,6 +144,7 @@ def run(since: datetime, data_source: bool) -> tuple[list[dict], list[dict]]:
         appr, appr_worklogs = _transform_periods_for_keboola(all_periods=raw_out, team_id=team['id'])
         result['approvals'].extend(appr)
         result['approval_worklogs'].extend(appr_worklogs)
+    logging.info("Finished loading timesheet approvals")
     return (result['approvals'], result['approval_worklogs'])
 
 

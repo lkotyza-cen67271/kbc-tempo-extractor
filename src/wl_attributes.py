@@ -94,7 +94,7 @@ def run(worklogs: list) -> dict[str, [dict[str, Any]]]:
         buffer_start = buffer_start + buffer_size
         attributes = tempo.worklog_attributes(buffered_worklog_ids)
         if attributes is not None:
-            attribute_data.append(attributes)
+            attribute_data.extend(attributes)
     logging.info(f"Finished loading worklog attributes [count:{len(attribute_data)}]")
     logging.info("Started to download attribute configs")
     config_data = []

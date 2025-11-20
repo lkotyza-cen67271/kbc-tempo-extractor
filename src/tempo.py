@@ -184,7 +184,6 @@ def worklog_attributes(worklogs: list) -> Optional[list[dict]]:
     req = {
         "tempoWorklogIds": worklogs
     }
-    logging.info(f"[debug] - work-attribute-values request: {req}")
     resp = _raw_post("/worklogs/work-attribute-values/search", req)
     if resp is None or (resp.status_code < 200 or resp.status_code >= 300):
         logging.error(f"[tempo.worklog_attributes] resp is None or status is {resp.status_code}")

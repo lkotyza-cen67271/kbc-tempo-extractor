@@ -23,6 +23,7 @@ _COL_START = "period_start"
 _COL_END = "period_end"
 _COL_USER = "account_id"
 _COL_REVIEWER = "reviewer_account_id"
+_COL_APPROVED_BY = "approved_by_account_id"
 _COL_STATUS = "status"
 
 
@@ -78,6 +79,12 @@ def table_column_definitions() -> dict[str, dict[str, ColumnDefinition]]:
                 nullable=True,
                 primary_key=False,
                 description="User that is selected as a reviewer"
+            ),
+            _COL_APPROVED_BY: ColumnDefinition(
+                data_types=BaseType(dtype=SupportedDataTypes.STRING, length="100"),
+                nullable=True,
+                primary_key=False,
+                description="User that approved the approval"
             ),
             _COL_STATUS: ColumnDefinition(
                 data_types=BaseType(dtype=SupportedDataTypes.STRING, length="20"),
@@ -175,7 +182,8 @@ def _transform_periods_for_keboola(all_periods: list[dict], team_id: int) -> tup
             _COL_END: _date_from_str(period['period']['to']),
             _COL_STATUS: period['status'],
             _COL_USER: period['user'],
-            _COL_REVIEWER: period['reviewer']
+            _COL_REVIEWER: period['reviewer'],
+            _COL_APPROVED_BY: period['approved_by']
         }
         appr_output.append(appr_out)
         for wl in period['worklogs']:

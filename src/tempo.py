@@ -218,6 +218,7 @@ def team_timesheet_approvals(team_id: int,
         status: str,
         user: str (account_id),
         reviewer: Optional[str] (account_id),
+        approved_by: Optional[str] (account_id),
         worklogs: [worklog_id, worklog_id, ...]
     }
     """
@@ -236,11 +237,15 @@ def team_timesheet_approvals(team_id: int,
     for approval in data['results']:
         # log.status_line(counter, data['metadata']['count'], "Processing timesheet approvals")
         counter += 1
+        approved_by = ""
+        if approval['status']['key'] == "APPROVED":
+            approved_by = approval['status']['actor']['accountId']
         out = {
             "period": approval['period'],
             "status": approval['status']['key'],
             "user": approval['user']['accountId'],
             "reviewer": approval['reviewer']['accountId'] if 'reviewer' in approval.keys() else None,
+            "approved_by": approved_by,
             "worklogs": []
         }
         if load_worklogs:

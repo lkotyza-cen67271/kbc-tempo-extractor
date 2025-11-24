@@ -44,8 +44,6 @@ class Component(ComponentBase):
         tempo.init(params.tempo_token)
 
         since_date = self._parse_since_to_datetime(params.since)
-        logging.info(f"datasets selected: {params.datasets}")
-        logging.info(f"debug mode: {params.debug}")
 
         # worklog authors
         # deprecated - should not be used

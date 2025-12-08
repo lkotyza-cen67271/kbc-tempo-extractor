@@ -1,6 +1,7 @@
 #!/usr/bin/env python3.10
 from keboola.component.dao import BaseType, ColumnDefinition, SupportedDataTypes, logging
 from datetime import datetime, timedelta
+from dateutil import relativedelta
 import tempo
 import hashlib
 from typing import Optional
@@ -11,6 +12,7 @@ FILENAME_APPROVALS = "approvals.csv"
 FILENAME_APPROVAL_WORKLOGS = "approval_worklogs.csv"
 LOAD_JIRA_WORKLOGS = True
 LOAD_TEMPO_WORKLOGS = False
+READ_UNTIL_DATE = datetime.now() + relativedelta.relativedelta(months=1, day=1)
 
 
 _TABLE_APPROVALS = "approvals"
@@ -98,7 +100,7 @@ def table_column_definitions() -> dict[str, dict[str, ColumnDefinition]]:
 def run(since: datetime, worklog_data_source: bool) -> tuple[list[dict], list[dict]]:
     """
     since: datetime
-    data_source: bool - LOAD_JIRA_WORKLOGS | LOAD_TEMPO_WORKLOGS
+    data_source: bool - LOAD_JIRA_WORKLOGS | LOAD_TEMPO_WORKLOGS, determines type of identifier for worklogs (jira_id or tempo_id)
 
     returns tupple(approvals, approval_worklogs)
     """
@@ -115,7 +117,7 @@ def run(since: datetime, worklog_data_source: bool) -> tuple[list[dict], list[di
         # Load Approvals per team
         raw_out: list[dict] = []
         period_start_date = since
-        while period_start_date < datetime.now():
+        while period_start_date < READ_UNTIL_DATE:
             period = tempo.team_timesheet_approvals(team['id'],
                                                     str(period_start_date.date()),
                                                     worklog_source=worklog_data_source)

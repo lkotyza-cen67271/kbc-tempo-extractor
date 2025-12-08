@@ -100,7 +100,8 @@ def table_column_definitions() -> dict[str, dict[str, ColumnDefinition]]:
 def run(since: datetime, worklog_data_source: bool) -> tuple[list[dict], list[dict]]:
     """
     since: datetime
-    data_source: bool - LOAD_JIRA_WORKLOGS | LOAD_TEMPO_WORKLOGS, determines type of identifier for worklogs (jira_id or tempo_id)
+    data_source: bool - LOAD_JIRA_WORKLOGS | LOAD_TEMPO_WORKLOGS,
+                determines type of identifier for worklogs (jira_id or tempo_id)
 
     returns tupple(approvals, approval_worklogs)
     """

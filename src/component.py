@@ -59,7 +59,7 @@ class Component(ComponentBase):
                 )
                 self.write_out_data(table, list(coldef.keys()), data)
             else:
-                logging.warning("no worklog_author")
+                raise Exception("no worklog_author")
 
         # Worklogs
         worklogs_data = []
@@ -75,7 +75,7 @@ class Component(ComponentBase):
                 )
                 self.write_out_data(table, list(coldef.keys()), data)
             else:
-                logging.warning("no worklogs")
+                raise Exception("no worklogs")
 
         # Worklog attributes
         if "worklogs" in params.datasets and "worklog_attributes" in params.datasets:
@@ -96,7 +96,7 @@ class Component(ComponentBase):
                         data=attributes
                 )
             else:
-                logging.warning("no worklog attributes")
+                raise Exception("no worklog attributes")
             # attribute configs
             configs = data[wl_attributes._TABLE_WL_ATTR_CONFIG]
             if configs is not None and len(configs) > 0:
@@ -111,7 +111,7 @@ class Component(ComponentBase):
                         data=configs
                 )
             else:
-                logging.warning("no attribute configs")
+                raise Exception("no attribute configs")
 
         # Approvals (Jira)
         if "approvals_jira" in params.datasets:
@@ -126,7 +126,7 @@ class Component(ComponentBase):
                 )
                 self.write_out_data(table, list(coldefs[approvals._TABLE_APPROVALS].keys()), approvals_data)
             else:
-                logging.warning("no approvals")
+                raise Exception("no approvals")
             if appr_worklogs_data is not None and len(appr_worklogs_data) > 0:
                 table = self.create_out_table_definition(
                     approvals.FILENAME_APPROVAL_WORKLOGS,
@@ -139,7 +139,7 @@ class Component(ComponentBase):
                     appr_worklogs_data
                 )
             else:
-                logging.warning("no appr_worklogs_data")
+                raise Exception("no appr_worklogs_data")
 
         # Approvals (Tempo)
         if "approvals_tempo" in params.datasets:
@@ -154,7 +154,7 @@ class Component(ComponentBase):
                 )
                 self.write_out_data(table, list(coldefs[approvals._TABLE_APPROVALS].keys()), approvals_data)
             else:
-                logging.warning("no approvals")
+                raise Exception("no approvals")
             if appr_worklogs_data is not None and len(appr_worklogs_data) > 0:
                 table = self.create_out_table_definition(
                     approvals.FILENAME_APPROVAL_WORKLOGS,
@@ -167,7 +167,7 @@ class Component(ComponentBase):
                     appr_worklogs_data
                 )
             else:
-                logging.warning("no appr_worklogs_data")
+                raise Exception("no appr_worklogs_data")
 
         # Teams & Membership
         if "teams" in params.datasets:
@@ -187,7 +187,7 @@ class Component(ComponentBase):
                     data=teams
                 )
             else:
-                logging.warning("no teams")
+                raise Exception("no teams")
             membership = teams_data[team_membership._TABLE_TEAM_MEMBERSHIPS]
             if membership is not None and len(membership) > 0:
                 table = self.create_out_table_definition(
@@ -201,7 +201,7 @@ class Component(ComponentBase):
                     data=membership
                 )
             else:
-                logging.warning("no team membership")
+                raise Exception("no team membership")
 
     def _parse_since_to_datetime(self, raw_since: str) -> datetime:
         parser = dp.date.DateDataParser(languages=["en"])

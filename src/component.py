@@ -47,6 +47,7 @@ class Component(ComponentBase):
 
         # worklog authors
         # deprecated - should not be used
+        """
         if "worklog_authors" in params.datasets:
             since_mls = int(since_date.timestamp()) * 1_000
             data = worklog_author.run(since_mls)
@@ -60,6 +61,7 @@ class Component(ComponentBase):
                 self.write_out_data(table, list(coldef.keys()), data)
             else:
                 raise Exception("no worklog_author")
+        """
 
         # Worklogs
         worklogs_data = []
@@ -115,6 +117,7 @@ class Component(ComponentBase):
 
         # Approvals (Jira)
         if "approvals_jira" in params.datasets:
+            logging.warning("this dataset is deprecated and should not be used")
             logging.debug("approvals")
             approvals_data, appr_worklogs_data = approvals.run(since_date, approvals.LOAD_JIRA_WORKLOGS)
             coldefs = approvals.table_column_definitions()

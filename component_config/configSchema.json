@@ -55,8 +55,7 @@
 			"items": {
 				"options": {
 					"enum_titles": [
-						"Worklog Authors [deprecated]",
-						"Approvals (JIRA)",
+						"Approvals (JIRA) [deprecated]",
 						"Approvals (TEMPO)",
 						"Teams and Membership",
 						"Worklogs",
@@ -64,7 +63,6 @@
 					]
 				},
 				"enum": [
-					"worklog_authors",
 					"approvals_jira",
 					"approvals_tempo",
 					"teams",

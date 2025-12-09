@@ -122,6 +122,7 @@ def run(since: datetime, worklog_data_source: bool) -> tuple[list[dict], list[di
             period = tempo.team_timesheet_approvals(team['id'],
                                                     str(period_start_date.date()),
                                                     worklog_source=worklog_data_source)
+            """
             if period is None:
                 logging.warning("Period is None - retry 5 times")
                 logging.warning(f"(team: {team['id']} - {team['name']}; period_start: {str(period_start_date.date())})")
@@ -138,6 +139,7 @@ def run(since: datetime, worklog_data_source: bool) -> tuple[list[dict], list[di
                         logging.error(f"Retrying approvals failed. Skipping team {team['id']}...")
             if period is None:
                 break
+            """
             raw_out.extend(period)
             next_period_start_date = _next_period_start_from_current(period)
             if next_period_start_date is None:

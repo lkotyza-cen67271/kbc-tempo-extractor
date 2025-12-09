@@ -1,5 +1,7 @@
 from keboola.component.dao import logging
 from requests import Session, Response
+from requests.exceptions import JSONDecodeError
+from exceptions import TempoResponseException
 import json
 import time
 from typing import Optional, Callable, Any
@@ -32,18 +34,12 @@ def tempo_to_jira_worklog_ids(tempo_worklog_ids: list[int]) -> Optional[dict[int
     req = {
         'tempoWorklogIds': tempo_worklog_ids
     }
-    resp = _raw_post("/worklogs/tempo-to-jira?limit=500", data=req)
-    if resp is None or (resp.status_code < 200 or resp.status_code >= 300):
-        return
-    data = resp.json()
+    data = _checked_post("/worklogs/tempo-to-jira?limit=500", data=req)
     for map in data['results']:
         result[map['tempoWorklogId']] = map['jiraWorklogId']
     next = _parse_next(data['metadata'])
     while next is not None:
-        resp = _raw_post(next, data=req)
-        if resp.status_code < 200 or resp.status_code >= 300:
-            continue
-        data = resp.json()
+        data = _checked_post(next, data=req)
         for map in data['results']:
             result[map['tempoWorklogId']] = map['jiraWorklogId']
         next = _parse_next(data['metadata'])
@@ -65,20 +61,12 @@ def jira_to_tempo_worklog_ids(jira_worklog_ids: list[int]) -> Optional[dict[int,
     req = {
         'jiraWorklogIds': jira_worklog_ids
     }
-    resp = _raw_post("/worklogs/jira-to-tempo?limit=500", data=req)
-    if resp is None:
-        return
-    if resp.status_code < 200 or resp.status_code >= 300:
-        return
-    data = resp.json()
+    data = _checked_post("/worklogs/jira-to-tempo?limit=500", data=req)
     for map in data['results']:
         result[map['tempoWorklogId']] = map['jiraWorklogId']
     next = _parse_next(data['metadata'])
     while next is not None:
-        resp = _raw_post(next, data=req)
-        if resp.status_code < 200 or resp.status_code >= 300:
-            continue
-        data = resp.json()
+        data = _checked_post(next, data=req)
         for map in data['results']:
             result[map['tempoWorklogId']] = map['jiraWorklogId']
         next = _parse_next(data['metadata'])
@@ -89,11 +77,7 @@ def team_membership(team_id: int) -> Optional[list[dict]]:
     """
     List of users in Tempo Team. https://apidocs.tempo.io/#tag/Team-Memberships/operation/getAllMemberships
     """
-    resp = _raw_get(f"/team-memberships/team/{team_id}")
-    if resp is None or (resp.status_code < 200 or resp.status_code >= 300):
-        logging.error("tempo.team_memberships", f"resp is None or status is {resp.status_code}")
-        return
-    data = resp.json()
+    data = _checked_post(f"/team-memberships/team/{team_id}")
     return data['results']
 
 
@@ -110,19 +94,11 @@ def teams() -> Optional[list[dict]]:
         "offset": 0,
         "limit": 50
     }
-    resp = _raw_get("/teams", params=req)
-    if resp is None or (resp.status_code < 200 or resp.status_code >= 300):
-        logging.error(f"[tempo.teams resp] is None or status is {resp.status_code}")
-        return
-    data = resp.json()
+    data = _checked_get("/teams", params=req)
     teams.extend(data['results'])
     next = _parse_next(data['metadata'])
     while next is not None:
-        resp = _raw_get(next, params=req)
-        if resp.status_code < 200 or resp.status_code >= 300:
-            logging.error("tempo.teams", f"resp is None or status is {resp.status_code}")
-            continue
-        data = resp.json()
+        data = _checked_get(next, params=req)
         teams.extend(data['results'])
         next = _parse_next(data['metadata'])
     return teams
@@ -148,19 +124,11 @@ def attribute_config() -> Optional[list[dict[str, Any]]]:
             })
         return transformed_output
     result = []
-    resp = _raw_get("/work-attributes")
-    if resp is None or (resp.status_code < 200 or resp.status_code >= 300):
-        logging.error(f"[tempo.attribute_config] resp is None or status is {resp.status_code}")
-        return
-    data = resp.json()
+    data = _checked_get("/work-attributes")
     result.extend(transform_data(data))
     next = _parse_next(data['metadata'])
     while next is not None:
-        resp = _raw_get(next)
-        if resp.status_code < 200 or resp.status_code >= 300:
-            logging.error(f"[tempo.attribute_config] resp is None or status is {resp.status_code}")
-            continue
-        data = resp.json()
+        data = _checked_get(next)
         result.extend(transform_data(data))
         next = _parse_next(data['metadata'])
     return result
@@ -184,11 +152,7 @@ def worklog_attributes(worklogs: list) -> Optional[list[dict]]:
     req = {
         "tempoWorklogIds": worklogs
     }
-    resp = _raw_post("/worklogs/work-attribute-values/search", req)
-    if resp is None or (resp.status_code < 200 or resp.status_code >= 300):
-        logging.error(f"[tempo.worklog_attributes] resp is None or status is {resp.status_code}")
-        return
-    data = resp.json()
+    data = _checked_post("/worklogs/work-attribute-values/search", req)
     result = []
     for wl_attrs in data:
         worklog_id = wl_attrs['tempoWorklogId']
@@ -226,17 +190,8 @@ def team_timesheet_approvals(team_id: int,
     req = {
         "from": date_from
     }
-    resp = _raw_get(f"/timesheet-approvals/team/{team_id}", params=req)
-    if resp.status_code < 200 or resp.status_code >= 300:
-        logging.error(f"tempo.team_timesheet_approvals resp is None or status is {resp.status_code}")
-        headers = [f"{k}:{v}" for k, v in resp.headers.items()]
-        logging.error(f"headers: {' ; '.join(headers)} body: {resp.text}")
-        return
-    data = resp.json()
-    counter = 0
+    data = _checked_get(f"/timesheet-approvals/team/{team_id}", params=req)
     for approval in data['results']:
-        # log.status_line(counter, data['metadata']['count'], "Processing timesheet approvals")
-        counter += 1
         approved_by = ""
         if approval['status']['key'] == "APPROVED":
             approved_by = approval['status']['actor']['accountId']
@@ -271,20 +226,12 @@ def _worklogs_from_approval(approval: dict) -> Optional[list[dict]]:
     parsed_url = str(worklogs_url[len(_base_url):])
     results = []
     # Load first page
-    resp = _raw_get(parsed_url)
-    if resp.status_code < 200 or resp.status_code >= 300:
-        # log.error("tempo._worklogs_from_approval", "resp is None or status is not 2xx")
-        return
-    data = resp.json()
+    data = _checked_get(parsed_url)
     results.extend(data['results'])
     next = _parse_next(data['metadata'])
     # Load rest of the pages if exists
     while next is not None:
-        resp = _raw_get(next)
-        if resp.status_code < 200 or resp.status_code >= 300:
-            # log.error("tempo._worklogs_from_approval", "resp is None or status is not 2xx")
-            continue
-        data = resp.json()
+        data = _checked_get(next)
         results.extend(data['results'])
         next = _parse_next(data['metadata'])
     return results
@@ -299,43 +246,26 @@ def worklogs_updated_from(since: str, modify_result: Callable = None) -> Optiona
         "updatedFrom": since,
         "limit": 5000
     }
-    resp = _raw_get("/worklogs", params=req)
-    if resp is None or (resp.status_code < 200 or resp.status_code >= 300):
-        logging.error(f"[worklogs] is None or status is {resp.status_code}")
-        return
-    data = resp.json()
+    data = _checked_get("/worklogs", params=req)
     for item in data['results']:
         modified_item = item
         if modify_result is not None:
             modified_item = modify_result(item)
         result.append(modified_item)
     next = _parse_next(data['metadata'])
-    iter_c = 0
-    while next is not None and iter_c < _MAX_ITER_COUNT:
-        iter_c += 1
-        resp = _raw_get(next, params=req)
-        if resp is None or (resp.status_code < 200 or resp.status_code >= 300):
-            logging.error(f"[worklogs]next[{next}] is None or status is {resp.status_code}")
-            time.sleep(1)
-            continue
-        data = resp.json()
+    while next is not None:
+        data = _checked_get(next, params=req)
         for item in data['results']:
             modified_item = item
             if modify_result is not None:
                 modified_item = modify_result(item)
             result.append(modified_item)
         next = _parse_next(data['metadata'])
-        iter_c = 0
-    if iter_c != 0:
-        logging.error(f"[worklogs] failed to get all worklogs;iter_c={iter_c}")
     return result
 
 
 def worklog_author(worklog_id: int) -> Optional[str]:
-    resp = _raw_get(f"/worklogs/{worklog_id}")
-    if resp.status_code < 200 or resp.status_code >= 300:
-        return None
-    data = resp.json()
+    data = _checked_get(f"/worklogs/{worklog_id}")
     return data['author']['accountId']
 
 
@@ -356,3 +286,61 @@ def _raw_post(endpoint, data: Optional[dict] = None) -> Response:
     assert endpoint is not None and len(endpoint) > 0
     raw_response = _s.post(f"{_base_url}{endpoint}", data=json.dumps(data))
     return raw_response
+
+
+def _checked_get(endpoint: str, data: Optional[dict] = None) -> dict[str, Any]:
+    """
+    Description:
+        calls the specified endpoint with GET method, then validates the response and returns it as a python-dict
+    Args:
+        endpoint: str - tempo endpoint to call,
+                        for example in url: https://api.tempo.io/4/worklogs/tempo-to-jira
+                        endpoint = /worklogs/tempo-to-jira
+        data: *optional* dict - data that will be sent as request parameters
+    Returns:
+        Response.json()
+    Raises:
+        TempoResponseException - response code is not 2xx
+        Exception - Response object is None or when the response content is empty string or invalid JSON
+    """
+    assert endpoint is not None and len(endpoint) > 0
+    raw_resp = _raw_get(endpoint, data)
+    if raw_resp is None:
+        raise Exception(f"Response object is None - {endpoint}")
+    if raw_resp.status_code < 200 or raw_resp.status_code >= 300:
+        raise TempoResponseException(endpoint, raw_resp)
+    data = {}
+    try:
+        data = raw_resp.json()
+    except JSONDecodeError:
+        raise Exception(f"Invalid JSON in response from TEMPO-API ({endpoint}) - response.text='{raw_resp.text}'")
+    return data
+
+
+def _checked_post(endpoint: str, data: Optional[dict] = None) -> dict[str, Any]:
+    """
+    Description:
+        calls the specified endpoint with POST method, then validates the response and returns it as a python-dict
+    Args:
+        endpoint: str - tempo endpoint to call,
+                        for example in url: https://api.tempo.io/4/worklogs/tempo-to-jira
+                        endpoint = /worklogs/tempo-to-jira
+        data: *optional* dict - data that will be sent in request body as JSON
+    Returns:
+        Response.json()
+    Raises:
+        TempoResponseException - response code is not 2xx
+        Exception - Response object is None or when the response content is empty string or invalid JSON
+    """
+    assert endpoint is not None and len(endpoint) > 0
+    raw_resp = _raw_post(endpoint, data)
+    if raw_resp is None:
+        raise Exception(f"Response object is None - {endpoint}")
+    if raw_resp.status_code < 200 or raw_resp.status_code >= 300:
+        raise TempoResponseException(endpoint, raw_resp)
+    data = {}
+    try:
+        data = raw_resp.json()
+    except JSONDecodeError:
+        raise Exception(f"Invalid JSON in response from TEMPO-API ({endpoint}) - response.text='{raw_resp.text}'")
+    return data

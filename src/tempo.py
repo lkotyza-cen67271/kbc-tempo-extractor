@@ -2,13 +2,15 @@ from keboola.component.dao import logging
 from requests import Session, Response
 from requests.exceptions import JSONDecodeError
 from exceptions import TempoResponseException
-import json
 from typing import Optional, Callable, Any
+import json
+import time
 
 
 _base_url = "https://api.eu.tempo.io/4"
 _s = Session()
-_MAX_ITER_COUNT = 5
+_RETRY_DELAY_SEC = 10
+_MAX_RETRY_COUNT = 5
 
 
 def init(token):
@@ -287,10 +289,11 @@ def _raw_post(endpoint, data: Optional[dict] = None) -> Response:
     return raw_response
 
 
-def _checked_get(endpoint: str, params: Optional[dict] = None) -> dict[str, Any]:
+def _checked_get(endpoint: str, params: Optional[dict] = None, _retry_count: int = 0) -> dict[str, Any]:
     """
     Description:
         calls the specified endpoint with GET method, then validates the response and returns it as a python-dict
+        on fail call will be retried _MAX_RETRY_COUNT number of times with delay of _RETRY_DELAY_SEC
     Args:
         endpoint: str - tempo endpoint to call,
                         for example in url: https://api.tempo.io/4/worklogs/tempo-to-jira
@@ -307,7 +310,13 @@ def _checked_get(endpoint: str, params: Optional[dict] = None) -> dict[str, Any]
     if raw_resp is None:
         raise Exception(f"Response object is None - {endpoint}")
     if raw_resp.status_code < 200 or raw_resp.status_code >= 300:
-        raise TempoResponseException(endpoint, raw_resp)
+        if _retry_count < _MAX_RETRY_COUNT:
+            time.sleep(_RETRY_DELAY_SEC)
+            logging.warning(f"WARN TEMPO-API {endpoint} [{raw_resp.status_code}]"
+                            + f" failed - retrying {_retry_count} / {_MAX_RETRY_COUNT}")
+            return _checked_get(endpoint, params, _retry_count + 1)
+        else:
+            raise TempoResponseException(endpoint, raw_resp)
     data = {}
     try:
         data = raw_resp.json()
@@ -316,10 +325,11 @@ def _checked_get(endpoint: str, params: Optional[dict] = None) -> dict[str, Any]
     return data
 
 
-def _checked_post(endpoint: str, data: Optional[dict] = None) -> dict[str, Any]:
+def _checked_post(endpoint: str, data: Optional[dict] = None, _retry_count: int = 0) -> dict[str, Any]:
     """
     Description:
         calls the specified endpoint with POST method, then validates the response and returns it as a python-dict
+        on fail call will be retried _MAX_RETRY_COUNT number of times with delay of _RETRY_DELAY_SEC
     Args:
         endpoint: str - tempo endpoint to call,
                         for example in url: https://api.tempo.io/4/worklogs/tempo-to-jira
@@ -336,7 +346,13 @@ def _checked_post(endpoint: str, data: Optional[dict] = None) -> dict[str, Any]:
     if raw_resp is None:
         raise Exception(f"Response object is None - {endpoint}")
     if raw_resp.status_code < 200 or raw_resp.status_code >= 300:
-        raise TempoResponseException(endpoint, raw_resp)
+        if _retry_count < _MAX_RETRY_COUNT:
+            time.sleep(_RETRY_DELAY_SEC)
+            logging.warning(f"WARN TEMPO-API {endpoint} [{raw_resp.status_code}]"
+                            + f" failed - retrying {_retry_count} / {_MAX_RETRY_COUNT}")
+            return _checked_post(endpoint, data, _retry_count + 1)
+        else:
+            raise TempoResponseException(endpoint, raw_resp)
     data = {}
     try:
         data = raw_resp.json()

@@ -287,7 +287,7 @@ def _raw_post(endpoint, data: Optional[dict] = None) -> Response:
     return raw_response
 
 
-def _checked_get(endpoint: str, data: Optional[dict] = None) -> dict[str, Any]:
+def _checked_get(endpoint: str, params: Optional[dict] = None) -> dict[str, Any]:
     """
     Description:
         calls the specified endpoint with GET method, then validates the response and returns it as a python-dict
@@ -295,7 +295,7 @@ def _checked_get(endpoint: str, data: Optional[dict] = None) -> dict[str, Any]:
         endpoint: str - tempo endpoint to call,
                         for example in url: https://api.tempo.io/4/worklogs/tempo-to-jira
                         endpoint = /worklogs/tempo-to-jira
-        data: *optional* dict - data that will be sent as request parameters
+        params: *optional* dict - data that will be sent as request parameters
     Returns:
         Response.json()
     Raises:
@@ -303,7 +303,7 @@ def _checked_get(endpoint: str, data: Optional[dict] = None) -> dict[str, Any]:
         Exception - Response object is None or when the response content is empty string or invalid JSON
     """
     assert endpoint is not None and len(endpoint) > 0
-    raw_resp = _raw_get(endpoint, data)
+    raw_resp = _raw_get(endpoint, params)
     if raw_resp is None:
         raise Exception(f"Response object is None - {endpoint}")
     if raw_resp.status_code < 200 or raw_resp.status_code >= 300:

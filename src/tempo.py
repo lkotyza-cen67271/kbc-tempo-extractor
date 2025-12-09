@@ -268,7 +268,7 @@ def worklog_author(worklog_id: int) -> str:
     return data['author']['accountId']
 
 
-def _parse_next(metadata: dict) -> str:
+def _parse_next(metadata: dict) -> Optional[str]:
     next: Optional[str] = metadata['next'] if "next" in metadata.keys() else None
     if next is not None:
         return next[len(_base_url):]

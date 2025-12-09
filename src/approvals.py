@@ -5,7 +5,6 @@ from dateutil import relativedelta
 import tempo
 import hashlib
 from typing import Optional
-import time
 
 
 FILENAME_APPROVALS = "approvals.csv"

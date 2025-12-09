@@ -77,7 +77,7 @@ def team_membership(team_id: int) -> Optional[list[dict]]:
     """
     List of users in Tempo Team. https://apidocs.tempo.io/#tag/Team-Memberships/operation/getAllMemberships
     """
-    data = _checked_post(f"/team-memberships/team/{team_id}")
+    data = _checked_get(f"/team-memberships/team/{team_id}")
     return data['results']
 
 

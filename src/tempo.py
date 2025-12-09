@@ -3,7 +3,6 @@ from requests import Session, Response
 from requests.exceptions import JSONDecodeError
 from exceptions import TempoResponseException
 import json
-import time
 from typing import Optional, Callable, Any
 
 
@@ -19,7 +18,7 @@ def init(token):
     }
 
 
-def tempo_to_jira_worklog_ids(tempo_worklog_ids: list[int]) -> Optional[dict[int, int]]:
+def tempo_to_jira_worklog_ids(tempo_worklog_ids: list[int]) -> dict[int, int]:
     """
         maps between tempo worklog id and jira worklog id
 
@@ -46,7 +45,7 @@ def tempo_to_jira_worklog_ids(tempo_worklog_ids: list[int]) -> Optional[dict[int
     return result
 
 
-def jira_to_tempo_worklog_ids(jira_worklog_ids: list[int]) -> Optional[dict[int, int]]:
+def jira_to_tempo_worklog_ids(jira_worklog_ids: list[int]) -> dict[int, int]:
     """
         maps between jira worklog id and internal tempo worklog
 
@@ -73,7 +72,7 @@ def jira_to_tempo_worklog_ids(jira_worklog_ids: list[int]) -> Optional[dict[int,
     return result
 
 
-def team_membership(team_id: int) -> Optional[list[dict]]:
+def team_membership(team_id: int) -> list[dict]:
     """
     List of users in Tempo Team. https://apidocs.tempo.io/#tag/Team-Memberships/operation/getAllMemberships
     """
@@ -81,7 +80,7 @@ def team_membership(team_id: int) -> Optional[list[dict]]:
     return data['results']
 
 
-def teams() -> Optional[list[dict]]:
+def teams() -> list[dict]:
     """
     List of teams in tempo. https://apidocs.tempo.io/#tag/Team
 
@@ -104,7 +103,7 @@ def teams() -> Optional[list[dict]]:
     return teams
 
 
-def attribute_config() -> Optional[list[dict[str, Any]]]:
+def attribute_config() -> list[dict[str, Any]]:
     """
     returns {
         attribute_key: str,
@@ -134,7 +133,7 @@ def attribute_config() -> Optional[list[dict[str, Any]]]:
     return result
 
 
-def worklog_attributes(worklogs: list) -> Optional[list[dict]]:
+def worklog_attributes(worklogs: list) -> list[dict]:
     """
     loads attributes for specified worklogs
 
@@ -168,7 +167,7 @@ def worklog_attributes(worklogs: list) -> Optional[list[dict]]:
 def team_timesheet_approvals(team_id: int,
                              date_from: str,
                              load_worklogs: bool = True,
-                             worklog_source: bool = False) -> Optional[list[dict]]:
+                             worklog_source: bool = False) -> list[dict]:
     """
     timesheet approvals for specific team in Tempo Period
 
@@ -221,7 +220,7 @@ def team_timesheet_approvals(team_id: int,
     return results
 
 
-def _worklogs_from_approval(approval: dict) -> Optional[list[dict]]:
+def _worklogs_from_approval(approval: dict) -> list[dict]:
     worklogs_url = str(approval['worklogs']['self'])
     parsed_url = str(worklogs_url[len(_base_url):])
     results = []
@@ -237,7 +236,7 @@ def _worklogs_from_approval(approval: dict) -> Optional[list[dict]]:
     return results
 
 
-def worklogs_updated_from(since: str, modify_result: Callable = None) -> Optional[list[dict]]:
+def worklogs_updated_from(since: str, modify_result: Callable = None) -> list[dict]:
     """
     since: string <yyyy-MM-dd['T'HH:mm:ss]['Z']>
     """
@@ -264,12 +263,12 @@ def worklogs_updated_from(since: str, modify_result: Callable = None) -> Optiona
     return result
 
 
-def worklog_author(worklog_id: int) -> Optional[str]:
+def worklog_author(worklog_id: int) -> str:
     data = _checked_get(f"/worklogs/{worklog_id}")
     return data['author']['accountId']
 
 
-def _parse_next(metadata: dict) -> Optional[str]:
+def _parse_next(metadata: dict) -> str:
     next: Optional[str] = metadata['next'] if "next" in metadata.keys() else None
     if next is not None:
         return next[len(_base_url):]

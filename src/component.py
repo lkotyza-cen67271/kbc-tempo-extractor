@@ -97,7 +97,7 @@ class Component(ComponentBase):
                         data=attributes
                 )
             else:
-                raise Exception("no worklog attributes")
+                logging.warn("no worklog attributes")
             # attribute configs
             configs = data[wl_attributes._TABLE_WL_ATTR_CONFIG]
             if configs is not None and len(configs) > 0:
@@ -112,7 +112,7 @@ class Component(ComponentBase):
                         data=configs
                 )
             else:
-                raise Exception("no attribute configs")
+                logging.warn("no attribute configs")
 
         # Approvals (Jira)
         if "approvals_jira" in params.datasets:

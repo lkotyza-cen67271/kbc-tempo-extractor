@@ -184,6 +184,7 @@ def team_timesheet_approvals(team_id: int,
         user: str (account_id),
         reviewer: Optional[str] (account_id),
         approved_by: Optional[str] (account_id),
+        approved_date: Optional[date]
         worklogs: [worklog_id, worklog_id, ...]
     }
     """
@@ -194,14 +195,17 @@ def team_timesheet_approvals(team_id: int,
     data = _checked_get(f"/timesheet-approvals/team/{team_id}", params=req)
     for approval in data['results']:
         approved_by = ""
+        approved_date = None
         if approval['status']['key'] == "APPROVED":
             approved_by = approval['status']['actor']['accountId']
+            approved_date = approval['status']['updatedAt']
         out = {
             "period": approval['period'],
             "status": approval['status']['key'],
             "user": approval['user']['accountId'],
             "reviewer": approval['reviewer']['accountId'] if 'reviewer' in approval.keys() else None,
             "approved_by": approved_by,
+            "approved_date": approved_date,
             "worklogs": []
         }
         if load_worklogs:
